@@ -147,6 +147,9 @@ class UiSmokeTest {
             go("create", "Create and seed"); back()
             go("about", "Open source licences"); see("Save a backup file"); shot("17-about"); back()
             go("browser", "Browser"); back()
+            go("help", "The basics, in two minutes"); see("Torznab and Jackett"); see("The DHT tab")
+            rule.onNodeWithText("How to add a website as a source").performClick(); see("Results page address"); see("https://example.org/search?q=test"); shot("18-help"); back()
+            go("settings", "How to use Swarm"); back()
             see("Torrents (0)")
             println("ALL SCREENS OPENED")
         } finally {

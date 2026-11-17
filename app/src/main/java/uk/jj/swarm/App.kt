@@ -58,6 +58,7 @@ object Ui {
     val tab = MutableStateFlow(0)                     // bottom tab: 0 Torrents, 1 Search, 2 DHT, 3 Video, 4 Music
     val openHash = MutableStateFlow<String?>(null)    // torrent to open from a notification
     val go = MutableStateFlow<String?>(null)          // screen to open ("back" goes back)
+    @Volatile var helpTopic: String? = null           // help topic to open first, or null for the list
     @Volatile var browserUrl: String? = null          // page the browser should open next, instead of its start page
     @Volatile var hit: Hit? = null                    // search result being viewed
     fun say(s: String) { message.value = s }

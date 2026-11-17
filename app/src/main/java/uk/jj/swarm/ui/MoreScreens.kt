@@ -70,6 +70,7 @@ fun SourcesScreen(nav: NavHostController) {
     BackPage("Search sources", { nav.popBackStack() }, actions = { IconButton(onClick = { add = true }) { Icon(Icons.Filled.Add, "Add a source") } }) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             Banner("Swarm comes with open catalogues only. Any source you add is your choice. Many sites list material that is not free to share, so only download what you have the right to.", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+            HelpLink(nav, "How to add a source", "Step by step: a website, or a Torznab / Jackett address", "website")
             SectionTitle(null, "Built in")
             Search.BUILT_IN.forEach { (name, desc) -> SwitchRow(name, "src_$name", true, desc) }
             SectionTitle(null, "Your sources")
@@ -94,7 +95,7 @@ fun SourcesScreen(nav: NavHostController) {
 private fun AddSourceDialog(onClose: () -> Unit, onSaved: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    var type by remember { mutableStateOf("torznab") }
+    var type by remember { mutableStateOf("site") }
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     var key by remember { mutableStateOf("") }
@@ -112,8 +113,8 @@ private fun AddSourceDialog(onClose: () -> Unit, onSaved: () -> Unit) {
     AlertDialog(onDismissRequest = onClose, title = { Text("Add a source") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(type == "torznab", { type = "torznab"; status = "" }, { Text("Torznab / Jackett") })
                 FilterChip(type == "site", { type = "site"; status = "" }, { Text("Website") })
+                FilterChip(type == "torznab", { type = "torznab"; status = "" }, { Text("Torznab / Jackett") })
             }
             Text(if (type == "torznab") "Paste the Torznab feed address and API key from Jackett or Prowlarr, or a site's own Torznab address."
                 else "Search the site in your browser for the word test, then paste the address of the results page here.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp))

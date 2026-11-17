@@ -290,6 +290,7 @@ fun DhtScreen(nav: NavHostController, openMenu: () -> Unit) {
                         else -> "Crawler idle"
                     }
                     Text(status, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("What is this?", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 4.dp).clickable { Ui.helpTopic = "dht"; nav.navigate("help") })
                 }
                 Switch(mode != 0, { on -> mode = if (on) 1 else 0; Prefs.setI("crawlMode", mode); Crawler.update() })
             }

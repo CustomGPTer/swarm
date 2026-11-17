@@ -1,4 +1,4 @@
-# Swarm 1.1 — torrent app for Android
+# Swarm 1.2 — torrent app for Android
 
 Original app. No ads, no analytics, no accounts. Swarm talks to the BitTorrent network, to the search
 sources you switch on, and to GitHub (at most twice a day) to see whether a newer version is out.
@@ -28,6 +28,8 @@ Website, download and release notes: https://customgpter.github.io/swarm/
   sort into folders, port, public trackers, encryption, seeding (ratio / stop / keep going), VPN warning
   or block, safety checks, adult filter, IP blocklist, Auto-Shutdown, battery saver, scheduled hours,
   only while charging, crawler mode and index size.
+- **Help**: a searchable Help page (top of Settings and in the side menu) explaining every tab and setting, with
+  step-by-step guides for adding a website source and a Torznab / Jackett address, and what the DHT is.
 - **Side menu**: search sources, RSS feeds with filters and automatic downloading, watchlist for saved
   searches, create a torrent, a browser that picks up torrent links, backup and restore, update check.
 

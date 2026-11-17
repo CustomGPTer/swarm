@@ -122,6 +122,8 @@ class SiteShotsTest {
             Ui.go.value = "back"; rule.waitForIdle()
             Ui.go.value = "sources"; rule.waitForIdle(); see("Built in"); shot("sources"); Ui.go.value = "back"; rule.waitForIdle()
             Ui.go.value = "about"; rule.waitForIdle(); see("Open source licences"); shot("about"); Ui.go.value = "back"; rule.waitForIdle()
+            Ui.go.value = "help"; rule.waitForIdle(); see("The basics, in two minutes"); shot("help")
+            rule.onNodeWithText("The DHT tab").performClick(); rule.waitForIdle(); see("What the DHT is"); shot("help-dht"); Ui.go.value = "back"; rule.waitForIdle()
         } finally {
             Engine.stopSession()
             Thread.sleep(300)

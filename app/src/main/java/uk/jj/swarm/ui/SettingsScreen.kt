@@ -107,6 +107,7 @@ fun SettingsScreen(nav: NavHostController) {
 
     BackPage("Settings", { nav.popBackStack() }) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 30.dp)) {
+            HelpLink(nav, "Help", "How to use Swarm, what each thing does, and how to add sources. In plain words.")
             SectionTitle(Icons.Filled.Palette, "Theme")
             listOf(0 to "Light", 1 to "Dark", 2 to "Use system default").forEach { (v, l) ->
                 Row(Modifier.fillMaxWidth().clickable { Prefs.setI("theme", v) }.padding(horizontal = 22.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {

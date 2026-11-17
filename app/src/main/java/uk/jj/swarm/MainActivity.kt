@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -110,6 +111,7 @@ fun Root() {
             composable("create") { CreateScreen(nav) }
             composable("about") { AboutScreen(nav) }
             composable("browser") { BrowserScreen(nav) }
+            composable("help") { uk.jj.swarm.ui.HelpScreen(nav) }
         }
         SnackbarHost(snack, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 86.dp))
     }
@@ -159,6 +161,7 @@ fun Home(nav: NavHostController) {
                 item(Icons.Filled.AddBox, "Create a torrent", "create")
                 item(Icons.Filled.Public, "Browser", "browser")
                 item(Icons.Filled.Info, "About and backup", "about")
+                item(Icons.AutoMirrored.Filled.HelpOutline, "Help", "help")
                 HorizontalDivider(Modifier.padding(vertical = 8.dp, horizontal = 24.dp))
                 NavigationDrawerItem(icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, null) }, label = { Text("Exit") }, selected = false,
                     onClick = { scope.launch { drawer.close() }; exit = true }, modifier = Modifier.padding(horizontal = 12.dp))
