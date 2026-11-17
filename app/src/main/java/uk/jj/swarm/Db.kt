@@ -89,14 +89,16 @@ class Db private constructor(ctx: Context) : SQLiteOpenHelper(ctx, "swarm.db", n
 
     private val cols = "d.hash,d.name,d.size,d.nfiles,d.files,d.first_seen,d.seeders,d.leechers"
 
-    fun dhtRecent(limit: Int): List<DhtRow> = dhtRows("SELECT $cols FROM dht d ORDER BY d.first_seen DESC LIMIT $limit", emptyArray())
+    private fun dhtOrder(sort: Int) = when (sort) { 1 -> "d.seeders DESC, d.first_seen DESC"; 2 -> "d.size DESC"; else -> "d.first_seen DESC" }
+
+    fun dhtRecent(limit: Int, sort: Int = 0): List<DhtRow> = dhtRows("SELECT $cols FROM dht d ORDER BY ${dhtOrder(sort)} LIMIT $limit", emptyArray())
 
     fun dhtGet(hash: String): DhtRow? = dhtRows("SELECT $cols FROM dht d WHERE d.hash=?", arrayOf(hash)).firstOrNull()
 
     /** sort: 0 newest, 1 seeders, 2 size */
     fun dhtSearch(query: String, sort: Int, limit: Int): List<DhtRow> {
-        val m = ftsQuery(query) ?: return dhtRecent(limit)
-        val order = when (sort) { 1 -> "d.seeders DESC, d.first_seen DESC"; 2 -> "d.size DESC"; else -> "d.first_seen DESC" }
+        val m = ftsQuery(query) ?: return dhtRecent(limit, sort)
+        val order = dhtOrder(sort)
         return try {
             dhtRows("SELECT $cols FROM dht_fts f JOIN dht d ON d.id=f.docid WHERE dht_fts MATCH ? ORDER BY $order LIMIT $limit", arrayOf(m))
         } catch (e: Exception) { emptyList() }
@@ -106,6 +108,15 @@ class Db private constructor(ctx: Context) : SQLiteOpenHelper(ctx, "swarm.db", n
 
     fun dhtSetScrape(hash: String, seeders: Int, leechers: Int) {
         writableDatabase.execSQL("UPDATE dht SET seeders=?, leechers=?, scraped=? WHERE hash=?", arrayOf<Any>(seeders, leechers, System.currentTimeMillis(), hash))
+    }
+
+    /** What the swarm itself showed when the details were fetched. Does not count as a tracker lookup. */
+    fun dhtSetSwarm(hash: String, seeders: Int, leechers: Int) {
+        writableDatabase.execSQL("UPDATE dht SET seeders=?, leechers=? WHERE hash=?", arrayOf<Any>(seeders, leechers, hash))
+    }
+
+    fun dhtMarkScraped(hash: String) {
+        writableDatabase.execSQL("UPDATE dht SET scraped=? WHERE hash=?", arrayOf<Any>(System.currentTimeMillis(), hash))
     }
 
     fun dhtPrune(max: Int) {

@@ -58,6 +58,7 @@ object Ui {
     val tab = MutableStateFlow(0)                     // bottom tab: 0 Torrents, 1 Search, 2 DHT, 3 Video, 4 Music
     val openHash = MutableStateFlow<String?>(null)    // torrent to open from a notification
     val go = MutableStateFlow<String?>(null)          // screen to open ("back" goes back)
+    @Volatile var browserUrl: String? = null          // page the browser should open next, instead of its start page
     @Volatile var hit: Hit? = null                    // search result being viewed
     fun say(s: String) { message.value = s }
 }
@@ -96,6 +97,15 @@ object Actions {
     suspend fun addHit(ctx: Context, h: Hit): String = withContext(Dispatchers.IO) {
         Engine.start(ctx); waitReady()
         if (h.hash != null && Engine.has(h.hash)) return@withContext "Already in Torrents"
+        if (h.pageOnly) {
+            // The listing gave no download link, so look on the result's own page. If the page only shows its
+            // link after a tap, open it in Swarm's browser, which picks the link up when the user taps it.
+            val full = try { uk.jj.swarm.search.SiteProvider.resolve(ctx, h) } catch (e: Exception) { null }
+            if (full != null && !full.pageOnly) return@withContext addHit(ctx, full)
+            Ui.browserUrl = h.page
+            Ui.go.value = "browser"
+            return@withContext "Tap the page's own download or magnet link and Swarm will pick it up"
+        }
         if (h.torrentUrl != null) {
             val (m, bytes) = Http.resolve(h.torrentUrl)
             if (bytes != null && Engine.addTorrentBytes(bytes, h.source) != null) return@withContext "Added to Torrents"

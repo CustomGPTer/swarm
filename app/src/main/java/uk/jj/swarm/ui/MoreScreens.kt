@@ -131,8 +131,10 @@ private fun AddSourceDialog(onClose: () -> Unit, onSaved: () -> Unit) {
                 val r = row() ?: return@TextButton
                 busy = true; status = "Testing with the word \"ubuntu\"…"
                 scope.launch(Dispatchers.IO) {
-                    val n = try { (if (r.type == "torznab") TorznabProvider(r) else SiteProvider(r, ctx)).search("ubuntu").size } catch (e: Exception) { -1 }
-                    status = when { n > 0 -> "Working: $n results came back."; n == 0 -> "It answered but gave no results Swarm could read. Check the address" + (if (r.type == "torznab") " and key." else ", or try the site's results page for another word."); else -> "Could not reach it." }
+                    val found = try { (if (r.type == "torznab") TorznabProvider(r) else SiteProvider(r, ctx)).search("ubuntu") } catch (e: Exception) { null }
+                    val n = found?.size ?: -1
+                    val pageOnly = found != null && found.isNotEmpty() && found.all { it.pageOnly }
+                    status = when { pageOnly -> "Working: $n results came back. This site keeps its download links on each result's own page, so Swarm opens that page when you tap Download."; n > 0 -> "Working: $n results came back."; n == 0 -> "It answered but gave no results Swarm could read. Check the address" + (if (r.type == "torznab") " and key." else ", or try the site's results page for another word."); else -> "Could not reach it." }
                     busy = false
                 }
             }) { Text("Test") }
@@ -330,7 +332,7 @@ fun AboutScreen(nav: NavHostController) {
 fun BrowserScreen(nav: NavHostController) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    var address by remember { mutableStateOf(Prefs.getS("browserHome", "https://archive.org")) }
+    var address by remember { mutableStateOf((Ui.browserUrl ?: Prefs.getS("browserHome", "https://archive.org")).also { Ui.browserUrl = null }) }
     var web by remember { mutableStateOf<WebView?>(null) }
     var loading by remember { mutableStateOf(false) }
     fun go(input: String) {

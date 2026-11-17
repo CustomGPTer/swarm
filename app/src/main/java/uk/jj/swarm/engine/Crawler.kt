@@ -38,6 +38,10 @@ object Crawler {
     private val pool = ArrayDeque<UdpEndpoint>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var job: Job? = null
+    private val asked = object : LinkedHashMap<String, Long>(1024, 0.75f, true) {
+        override fun removeEldestEntry(e: MutableMap.MutableEntry<String, Long>?) = size > 6000
+    }
+    private const val FETCHERS = 24
     @Volatile private var added = 0
     @Volatile private var failed = 0
 
@@ -52,14 +56,17 @@ object Crawler {
     @Synchronized fun update() {
         val mode = Prefs.crawlMode
         val should = mode != 0 && wants.isNotEmpty()
-        if (should && job == null) job = scope.launch { run() }
+        if (should && job?.isActive != true) { job = scope.launch { run() }; running.value = true }
         if (!should && job != null) { job?.cancel(); job = null; running.value = false }
     }
 
     @Synchronized fun stopAll() { wants.clear(); job?.cancel(); job = null; running.value = false }
 
+    /** Called when a run ends. Only the current run may mark the crawler as stopped: an older one finishing late must not. */
+    @Synchronized private fun ended(mine: Job?) { if (job === mine) { job = null; running.value = false } }
+
     private fun enqueue(hash: String) {
-        synchronized(queue) { if (queue.size < 3000) queue.add(hash) }
+        synchronized(queue) { if (queue.size < 6000) queue.add(hash) }
     }
 
     private fun poll(): String? = synchronized(queue) { val it = queue.iterator(); if (it.hasNext()) { val h = it.next(); it.remove(); h } else null }
@@ -69,7 +76,7 @@ object Crawler {
         when (a) {
             is DhtSampleInfohashesAlert -> {
                 for (h in a.samples()) enqueue(h.toHex())
-                synchronized(pool) { for (n in a.nodes()) if (pool.size < 600) pool.addLast(n.second) }
+                synchronized(pool) { for (n in a.nodes()) if (pool.size < 1500) pool.addLast(n.second) }
             }
             is DhtAnnounceAlert -> enqueue(a.infoHash().toHex())
             is DhtGetPeersAlert -> enqueue(a.infoHash().toHex())
@@ -80,12 +87,13 @@ object Crawler {
     private fun canWork() = Engine.ready.value && Engine.blocked.value == null && Engine.networkAllowed() && Engine.sm.isDhtRunning
 
     private suspend fun run() {
-        running.value = true
-        val db = Db.get(Engine.app)
+        val mine = currentCoroutineContext()[Job]
         try {
+            while (!Engine.isStarted || !Engine.ready.value) delay(500)
+            val db = Db.get(Engine.app)
             coroutineScope {
                 launch { sampler() }
-                repeat(6) { launch(Dispatchers.IO) { fetcher(db) } }
+                repeat(FETCHERS) { launch(Dispatchers.IO) { fetcher(db) } }
                 launch(Dispatchers.IO) { scraper(db) }
                 launch(Dispatchers.IO) {
                     while (isActive) {
@@ -94,7 +102,11 @@ object Crawler {
                     }
                 }
             }
-        } finally { running.value = false }
+        } catch (t: kotlinx.coroutines.CancellationException) {
+            throw t
+        } catch (t: Throwable) {
+            Log.w("Swarm", "crawler stopped", t)
+        } finally { ended(mine) }
     }
 
     internal fun refill() {
@@ -103,7 +115,7 @@ object Crawler {
             val list = ArrayList<UdpEndpoint>()
             for (i in 0 until nodes.size) list.add(UdpEndpoint(nodes[i]))
             list.shuffle()
-            synchronized(pool) { for (e in list.take(80)) pool.addLast(e) }
+            synchronized(pool) { for (e in list.take(160)) pool.addLast(e) }
         } catch (t: Throwable) { Log.w("Swarm", "dht refill", t) }
     }
 
@@ -111,14 +123,21 @@ object Crawler {
         while (currentCoroutineContext().isActive) {
             if (!canWork()) { delay(3000); continue }
             val qs = synchronized(queue) { queue.size }
-            if (qs < 300) {
-                if (synchronized(pool) { pool.size } < 12) refill()
-                repeat(8) {
-                    val ep = synchronized(pool) { pool.removeFirstOrNull() } ?: return@repeat
-                    try { Engine.sm.swig().dht_sample_infohashes(ep.swig(), Sha1Hash.fromBytes(Random.nextBytes(20)).swig()) } catch (t: Throwable) { }
+            if (qs < 1500) {
+                if (synchronized(pool) { pool.size } < 30) refill()
+                val now = System.currentTimeMillis()
+                var sent = 0; var looked = 0
+                while (sent < 24 && looked++ < 200) {
+                    val ep = synchronized(pool) { pool.removeFirstOrNull() } ?: break
+                    // A node asks not to be sampled again for a while, so leave each one alone for half an hour.
+                    val key = try { ep.toString() } catch (t: Throwable) { continue }
+                    val last = synchronized(asked) { asked[key] }
+                    if (last != null && now - last < 30 * 60_000L) continue
+                    synchronized(asked) { asked[key] = now }
+                    try { Engine.sm.swig().dht_sample_infohashes(ep.swig(), Sha1Hash.fromBytes(Random.nextBytes(20)).swig()); sent++ } catch (t: Throwable) { }
                 }
             }
-            delay(1500)
+            delay(1000)
         }
     }
 
@@ -126,7 +145,7 @@ object Crawler {
         while (currentCoroutineContext().isActive) {
             if (!canWork()) { delay(3000); continue }
             val hash = poll()
-            if (hash == null) { delay(1000); continue }
+            if (hash == null) { delay(700); continue }
             try { indexOne(db, hash, "magnet:?xt=urn:btih:$hash") } catch (t: Throwable) { Log.w("Swarm", "crawl fetch", t) }
         }
     }
@@ -142,6 +161,7 @@ object Crawler {
         if (name.isBlank()) { db.dhtMarkTried(hash); return false }
         if (Prefs.adultFilter && (ADULT.containsMatchIn(name) || ADULT.containsMatchIn(sb))) { db.dhtMarkTried(hash); db.dhtMarkTried(hash); return false }
         if (!db.dhtInsert(hash, name, meta.size, meta.files.size, sb.toString())) return false
+        if (meta.seeds >= 0) db.dhtSetSwarm(hash, meta.seeds, maxOf(0, meta.peers - meta.seeds))
         added++
         return true
     }
@@ -155,7 +175,8 @@ object Crawler {
                 val need = db.dhtNeedScrape(70)
                 if (need.isNotEmpty()) {
                     val res = Scrape.scrape(need, Prefs.trackerList())
-                    for (h in need) { val sl = res[h]; db.dhtSetScrape(h, sl?.seeders ?: -1, sl?.leechers ?: -1) }
+                    // A tracker that has never heard of a torrent says nothing useful, so keep what the swarm itself showed.
+                    for (h in need) { val sl = res[h]; if (sl != null) db.dhtSetScrape(h, sl.seeders, sl.leechers) else db.dhtMarkScraped(h) }
                 }
                 if (++rounds % 30 == 0) db.dhtPrune(Prefs.indexMax)
             } catch (t: Throwable) { Log.w("Swarm", "crawl scrape", t) }

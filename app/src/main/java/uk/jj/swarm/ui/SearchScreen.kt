@@ -88,6 +88,8 @@ fun SearchScreen(nav: NavHostController, openMenu: () -> Unit) {
     var history by remember { mutableStateOf<List<String>>(emptyList()) }
     var sourceCount by remember { mutableIntStateOf(0) }
     var sortMenu by remember { mutableStateOf(false) }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(s.sort, s.cat, s.query) { listState.scrollToItem(0) }
     LaunchedEffect(s.searched) { withContext(Dispatchers.IO) { history = Db.get(ctx).history(); sourceCount = Search.providers(ctx).size } }
 
     val shown = remember(s.hits, s.live, s.sort, s.cat) {
@@ -139,8 +141,8 @@ fun SearchScreen(nav: NavHostController, openMenu: () -> Unit) {
             }
             if (s.loading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 22.dp).height(2.dp))
             if (shown.isEmpty() && !s.loading) EmptyState(if (sourceCount == 0) "No search sources are switched on." else "Nothing found.", if (sourceCount == 0) "Add one in Search sources." else "Try fewer words, or the DHT tab.", if (sourceCount == 0) "Search sources" else null) { nav.navigate("sources") }
-            else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(shown, key = { it.source + it.key }) { h ->
+            else LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(bottom = 16.dp)) {
+                items(shown) { h ->
                     HitRow(h.title, h.source, h.size, s.seeders(h), s.leechers(h), h.published, h.note, h.hash?.let { Engine.has(it) } == true,
                         onClick = { Ui.hit = h; s.files = null; nav.navigate("result") },
                         onDownload = { scope.launch { Ui.say(Actions.addHit(ctx, h)) } })
@@ -156,7 +158,7 @@ fun HitRow(title: String, source: String, size: Long, seeders: Int, leechers: In
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 19.sp)
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                HealthDot(seeders)
+                HealthDot(if (seeders < 0 && note.startsWith("Web seeded")) 99 else seeders)
                 if (seeders >= 0) Text("▲ $seeders", color = Green, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 if (leechers >= 0) Text("▼ $leechers", color = Red, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 if (seeders < 0 && leechers < 0) Text(if (note.isNotBlank()) note.substringBefore(':') else "Seeders not known", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -230,7 +232,7 @@ fun ResultScreen(nav: NavHostController) {
             if (sl != null) Labeled("Finished", "${sl!!.completed} downloads counted by trackers")
             if (dhtPeers >= 0) Labeled("DHT peers", "$dhtPeers found just now")
             if (h.hash != null) Labeled("Info-hash", h.hash)
-            if (h.page != null) Row(Modifier.fillMaxWidth().clickable { try { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(h.page))) } catch (e: Exception) { } }.padding(horizontal = 20.dp, vertical = 8.dp)) {
+            if (h.page != null) Row(Modifier.fillMaxWidth().clickable { Ui.browserUrl = h.page; nav.navigate("browser") }.padding(horizontal = 20.dp, vertical = 8.dp)) {
                 Text("Web page", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, modifier = Modifier.width(118.dp)); Text(h.page, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
 
@@ -243,6 +245,7 @@ fun ResultScreen(nav: NavHostController) {
                     }
                 }
                 peeking -> Row(Modifier.padding(horizontal = 20.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp); Spacer(Modifier.width(10.dp)); Text("Asking the swarm for the file list…", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                h.pageOnly -> Text("This source keeps the download link on the result's own page. Tap Download and Swarm fetches it, or opens the page for you to tap the link.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 20.dp))
                 peekFailed -> Text("No peer answered in time, so the file list is not known. It will appear after you download.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 20.dp))
                 else -> Text("The file list is fetched from other peers. It needs a connection that Swarm is allowed to use.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 20.dp))
             }
@@ -264,6 +267,8 @@ fun DhtScreen(nav: NavHostController, openMenu: () -> Unit) {
     var rows by remember { mutableStateOf<List<DhtRow>>(emptyList()) }
     var mode by remember { mutableIntStateOf(Prefs.crawlMode) }
     var count by remember { mutableLongStateOf(0) }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(sort, query) { listState.scrollToItem(0) }
 
     LaunchedEffect(query, sort, stats.indexed) {
         withContext(Dispatchers.IO) { val db = Db.get(ctx); rows = db.dhtSearch(query, sort, 200); count = db.dhtCount() }
@@ -280,6 +285,7 @@ fun DhtScreen(nav: NavHostController, openMenu: () -> Unit) {
                         mode == 0 -> "Crawler is switched off"
                         blocked != null -> "Crawler waiting: $blocked"
                         !Engine.networkAllowed() -> "Crawler waiting for an allowed connection"
+                        running && !Engine.ready.value -> "Crawler starting…"
                         running -> "Crawling · ${stats.nodes} DHT nodes · ${stats.added} added this session · ${stats.queued} queued"
                         else -> "Crawler idle"
                     }
@@ -291,11 +297,11 @@ fun DhtScreen(nav: NavHostController, openMenu: () -> Unit) {
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             listOf("Newest", "Seeders", "Biggest").forEachIndexed { i, l -> FilterChip(sort == i, { sort = i }, { Text(l) }) }
             Spacer(Modifier.weight(1f))
-            Text(if (query.isBlank()) "Newly discovered" else "${rows.size} match${if (rows.size == 1) "" else "es"}", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 10.dp))
+            Text(if (query.isBlank()) listOf("Newly discovered", "Most seeders", "Biggest")[sort] else "${rows.size} match${if (rows.size == 1) "" else "es"}", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 10.dp))
         }
         if (rows.isEmpty()) EmptyState(if (query.isBlank()) "Your DHT index is empty so far." else "Nothing in your index matches.", if (query.isBlank()) "It fills while Swarm is open, and overnight on charge and Wi-Fi." else "The index only holds what the crawler has found so far.")
-        else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 16.dp)) {
-            items(rows, key = { it.hash }) { r ->
+        else LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(bottom = 16.dp)) {
+            items(rows) { r ->
                 val hit = Hit("DHT", r.name, Magnet.build(r.hash, r.name), null, r.hash, r.size, r.seeders, r.leechers, r.firstSeen, null, files = r.nfiles)
                 HitRow(r.name, "${r.nfiles} file${if (r.nfiles == 1) "" else "s"}", r.size, r.seeders, r.leechers, r.firstSeen, "", Engine.has(r.hash), "seen",
                     onClick = {

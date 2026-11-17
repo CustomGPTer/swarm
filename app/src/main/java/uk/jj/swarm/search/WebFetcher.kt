@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
  */
 object WebFetcher {
     @SuppressLint("SetJavaScriptEnabled")
-    fun html(ctx: Context, url: String, timeoutSec: Long = 25): String? {
+    fun html(ctx: Context, url: String, timeoutSec: Long = 25, ready: ((String) -> Boolean)? = null): String? {
         if (Looper.myLooper() == Looper.getMainLooper()) return null
         val main = Handler(Looper.getMainLooper())
         val latch = CountDownLatch(1)
@@ -35,7 +35,7 @@ object WebFetcher {
                     try {
                         w.evaluateJavascript("document.documentElement.outerHTML") { v ->
                             val html = try { JSONArray("[$v]").getString(0) } catch (e: Exception) { null }
-                            if (html != null && !SiteReader.looksBlocked(200, html)) { result = html; latch.countDown() }
+                            if (html != null && !SiteReader.looksBlocked(200, html) && (ready == null || tries >= 4 || try { ready(html) } catch (e: Exception) { true })) { result = html; latch.countDown() }
                             else if (++tries < 8) main.postDelayed(grab, 2500)
                             else { result = html; latch.countDown() }
                         }

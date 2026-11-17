@@ -16,7 +16,10 @@ data class Hit(
     val category: String = "", val note: String = "", val files: Int = -1,
 ) {
     /** Identity used for de-duplication and the watchlist. */
-    val key: String get() = hash ?: (torrentUrl ?: title).lowercase()
+    val key: String get() = hash ?: (torrentUrl ?: (if (magnet == null) page else null) ?: title).lowercase()
+
+    /** True for a result read from a listing that gives no download link: the link is on the result's own page. */
+    val pageOnly: Boolean get() = magnet == null && torrentUrl == null && hash == null && page != null
 }
 
 /**
@@ -169,13 +172,13 @@ object SiteReader {
         for (el in row.select("[class],[id],[title],[data-label]")) {
             val tag = (el.className() + " " + el.id() + " " + el.attr("title") + " " + el.attr("data-label")).lowercase()
             val strong = tag.contains("seed") || tag.contains("leech") || tag.contains("peer")
-            val weak = Regex("\\b(green|red|up|down|se|le)\\b").containsMatchIn(tag)
+            val weak = Regex("\\b(green|red|up|down|se|le)\\b").containsMatchIn(tag) || tag.contains("success") || tag.contains("danger")
             if (!strong && !weak) continue
             val txt = el.ownText().ifBlank { el.text() }
             val v = if (strong) leadInt(el.text()) else int(txt)
             if (v < 0) continue
-            if (s < 0 && (tag.contains("seed") || (!strong && Regex("\\b(green|up|se)\\b").containsMatchIn(tag)))) s = v
-            else if (l < 0 && (tag.contains("leech") || tag.contains("peer") || (!strong && Regex("\\b(red|down|le)\\b").containsMatchIn(tag)))) l = v
+            if (s < 0 && (tag.contains("seed") || (!strong && (Regex("\\b(green|up|se)\\b").containsMatchIn(tag) || tag.contains("success"))))) s = v
+            else if (l < 0 && (tag.contains("leech") || tag.contains("peer") || (!strong && (Regex("\\b(red|down|le)\\b").containsMatchIn(tag) || tag.contains("danger"))))) l = v
         }
         if (s < 0 || l < 0) {
             val tr = generateSequence(row) { it.parent() }.firstOrNull { it.tagName() == "tr" }
@@ -199,10 +202,40 @@ object SiteReader {
     }
 
     /** For listing pages with no magnet links of their own: the repeated same-site links most likely to be the results. */
-    fun candidates(html: String, baseUrl: String, limit: Int = 15): List<Pair<String, String>> {
-        val doc: Document = Jsoup.parse(html, baseUrl)
+    fun candidates(html: String, baseUrl: String, limit: Int = 15): List<Pair<String, String>> = candidateLinks(Jsoup.parse(html, baseUrl), baseUrl, limit).map { it.text().trim() to it.absUrl("href") }
+
+    /**
+     * Results on a listing page that shows no download links of its own, only a link to each result's page.
+     * The size, seeders and age are read from the block around each link; the download link is fetched later,
+     * from the result's page, when the user asks for it.
+     */
+    fun listing(html: String, baseUrl: String, source: String, now: Long = System.currentTimeMillis()): List<Hit> {
+        val doc = Jsoup.parse(html, baseUrl)
+        val links = candidateLinks(doc, baseUrl, 80)
+        if (links.size < 3) return emptyList()
+        val set = links.toSet()
+        val out = ArrayList<Hit>()
+        for (a in links) {
+            var row: Element = a
+            while (true) {
+                val p = row.parent() ?: break
+                if (p.tagName() == "body" || p.tagName() == "html") break
+                if (p.select("a[href]").any { it !== a && it in set && it.absUrl("href") != a.absUrl("href") }) break
+                row = p
+            }
+            val title = a.text().trim().take(300)
+            val rest = row.text().replace(title, " ")
+            val (s, l) = seedLeech(row, rest)
+            out += Hit(source, title, null, null, null, parseSize(rest), s, l, parseAge(rest, now), a.absUrl("href"))
+        }
+        // A list of torrents shows sizes. A list of anything else (news, forum threads, menus) does not.
+        if (out.count { it.size > 0 } * 3 < out.size) return emptyList()
+        return out.distinctBy { it.key }
+    }
+
+    private fun candidateLinks(doc: Document, baseUrl: String, limit: Int): List<Element> {
         val host = try { URI(baseUrl).host } catch (e: Exception) { null } ?: return emptyList()
-        val groups = LinkedHashMap<String, MutableList<Pair<String, String>>>()
+        val groups = LinkedHashMap<String, MutableList<Element>>()
         for (a in doc.select("a[href]")) {
             val url = a.absUrl("href"); val text = a.text().trim()
             if (text.length < 12 || !url.startsWith("http")) continue
@@ -211,10 +244,11 @@ object SiteReader {
             val path = u.path ?: continue
             if (path.count { it == '/' } < 1 || path.length < 3) continue
             val shape = path.trim('/').split('/').joinToString("/") { seg -> if (seg.any { it.isDigit() } || seg.length > 24) "*" else seg } + if (u.query != null) "?" + u.query.split('&').joinToString("&") { it.substringBefore('=') } else ""
-            groups.getOrPut(shape) { ArrayList() }.add(text to url)
+            groups.getOrPut(shape) { ArrayList() }.add(a)
         }
-        val best = groups.values.filter { it.size >= 3 }.maxByOrNull { g -> g.size * 10 + g.sumOf { it.first.length } / g.size } ?: return emptyList()
-        return best.distinctBy { it.second }.take(limit)
+        val best = groups.values.map { g -> g.distinctBy { it.absUrl("href") } }.filter { it.size >= 3 }
+            .maxByOrNull { g -> g.size * 10 + g.sumOf { it.text().trim().length } / g.size } ?: return emptyList()
+        return best.take(limit)
     }
 
     /** A single torrent's own page. */

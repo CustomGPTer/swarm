@@ -161,23 +161,30 @@ class SiteProvider(private val row: SourceRow, private val ctx: Context?) : Prov
     override val name = row.name
     override fun search(q: String): List<Hit> {
         val url = row.url.replace("{query}", URLEncoder.encode(q.trim(), "UTF-8"))
-        val html = fetch(url) ?: return emptyList()
-        val hits = SiteReader.parse(html, url, row.name)
-        if (hits.isNotEmpty()) return hits
-        // No magnet links on the results page: follow the result links one level down.
-        val cands = SiteReader.candidates(html, url)
-        if (cands.isEmpty()) return emptyList()
-        val pool = java.util.concurrent.Executors.newFixedThreadPool(5)
-        return try {
-            cands.map { (title, link) -> pool.submit(java.util.concurrent.Callable { fetch(link)?.let { SiteReader.detail(it, link, title, row.name) } }) }
-                .mapNotNull { try { it.get(30, TimeUnit.SECONDS) } catch (e: Exception) { null } }
-        } finally { pool.shutdownNow() }
+        fun read(html: String): List<Hit> = SiteReader.parse(html, url, row.name).ifEmpty { SiteReader.listing(html, url, row.name) }
+        val plain = Http.get(url)
+        if (!SiteReader.looksBlocked(plain.code, plain.body)) {
+            val hits = plain.body?.let { read(it) } ?: emptyList()
+            if (hits.isNotEmpty() || ctx == null) return hits
+        }
+        // The site refused a plain request, or builds its results with scripts: load it the way a browser would.
+        val html = ctx?.let { WebFetcher.html(it, url) { h -> read(h).isNotEmpty() } } ?: return emptyList()
+        return read(html)
     }
 
-    private fun fetch(url: String): String? {
-        val r = Http.get(url)
-        if (!SiteReader.looksBlocked(r.code, r.body)) return r.body
-        return ctx?.let { WebFetcher.html(it, url) } ?: r.body?.takeIf { r.code in 200..299 }
+    companion object {
+        /** Finds the download link on one result's own page. Null when the page shows none without being tapped. */
+        fun resolve(ctx: Context?, h: Hit): Hit? {
+            val page = h.page ?: return null
+            fun read(html: String) = SiteReader.detail(html, page, h.title, h.source)
+            val plain = Http.get(page)
+            if (!SiteReader.looksBlocked(plain.code, plain.body)) plain.body?.let { read(it) }?.let { return keep(h, it) }
+            val html = ctx?.let { WebFetcher.html(it, page, 20) { x -> read(x) != null } } ?: return null
+            return read(html)?.let { keep(h, it) }
+        }
+
+        private fun keep(from: Hit, d: Hit) = d.copy(size = if (from.size > 0) from.size else d.size, seeders = maxOf(from.seeders, d.seeders),
+            leechers = maxOf(from.leechers, d.leechers), published = if (from.published > 0) from.published else d.published, category = from.category)
     }
 }
 
@@ -207,7 +214,7 @@ object Search {
         onPartial(emptyList(), 0, ps.size)
         ps.map { p ->
             async(Dispatchers.IO) {
-                val hits = withTimeoutOrNull(45000) { try { p.search(q) } catch (e: Exception) { emptyList() } } ?: emptyList()
+                val hits = withTimeoutOrNull(70000) { try { p.search(q) } catch (e: Exception) { emptyList() } } ?: emptyList()
                 synchronized(merged) {
                     for (h in hits) { val cur = merged[h.key]; if (cur == null || h.seeders > cur.seeders) merged[h.key] = h }
                     done++

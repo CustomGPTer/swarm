@@ -63,7 +63,7 @@ data class TItem(
 data class Global(val dl: Long = 0, val ul: Long = 0, val dhtNodes: Long = 0, val downloading: Int = 0, val seeding: Int = 0)
 data class TFile(val index: Int, val path: String, val size: Long, val done: Long, val priority: Int)
 data class PeerRow(val ip: String, val client: String, val dl: Int, val ul: Int, val progress: Float)
-data class Meta(val name: String, val size: Long, val files: List<Pair<String, Long>>)
+data class Meta(val name: String, val size: Long, val files: List<Pair<String, Long>>, val seeds: Int = -1, val peers: Int = -1)
 data class StreamInfo(val hash: String, val fileIndex: Int, val file: File, val size: Long, val fileOffset: Long, val pieceLength: Int, val numPieces: Int)
 
 object Net {
@@ -171,7 +171,7 @@ object Engine {
     fun settingsPack(): SettingsPack {
         val sp = SettingsPack()
         val port = Prefs.port
-        sp.setString(settings_pack.string_types.user_agent.swigValue(), "Swarm/1.0")
+        sp.setString(settings_pack.string_types.user_agent.swigValue(), "Swarm/" + uk.jj.swarm.BuildConfig.VERSION_NAME)
         sp.listenInterfaces(if (port in 1024..65535) "0.0.0.0:$port,[::]:$port" else "0.0.0.0:0,[::]:0")
         sp.setEnableDht(true)
         sp.setEnableLsd(true)
@@ -184,7 +184,9 @@ object Engine {
         sp.activeSeeds(-1)
         sp.activeLimit(-1)
         sp.connectionsLimit(Prefs.maxConnections)
-        sp.alertQueueSize(5000)
+        sp.alertQueueSize(10000)
+        // The DHT's own speed cap is 8 KB/s by default, which starves the crawler's look-ups. This is a ceiling, not a target.
+        sp.setInteger(settings_pack.int_types.dht_upload_rate_limit.swigValue(), 40000)
         val mask = Alert.STATUS_NOTIFICATION.or_(Alert.ERROR_NOTIFICATION).or_(Alert.STORAGE_NOTIFICATION)
             .or_(Alert.DHT_NOTIFICATION).or_(Alert.DHT_OPERATION_NOTIFICATION)
         sp.setInteger(settings_pack.int_types.alert_mask.swigValue(), mask.to_int())
@@ -652,7 +654,9 @@ object Engine {
             val fs = ti.files()
             val files = ArrayList<Pair<String, Long>>()
             for (i in 0 until fs.numFiles()) if (!fs.padFileAt(i)) files += fs.filePath(i) to fs.fileSize(i)
-            return Meta(ti.name() ?: "", files.sumOf { it.second }, files)
+            var seeds = -1; var peers = -1
+            try { val st = h.status(); seeds = maxOf(st.listSeeds(), st.numSeeds()); peers = maxOf(st.listPeers(), st.numPeers(), seeds) } catch (t: Throwable) { }
+            return Meta(ti.name() ?: "", files.sumOf { it.second }, files, seeds, peers)
         }
         return try {
             if (reg.containsKey(hash)) return find(hash)?.let { read(it) }

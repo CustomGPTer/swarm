@@ -18,6 +18,7 @@ import java.nio.ByteBuffer
 
 class LogicTest {
     private fun res(name: String) = javaClass.classLoader!!.getResource(name)!!.readText()
+    private val NOW = 1_800_000_000_000L
     private val H1 = "0123456789abcdef0123456789abcdef01234567"
     private val H2 = "89abcdef0123456789abcdef0123456789abcdef"
     private val H3 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -141,6 +142,41 @@ class LogicTest {
 
     // ---------------------------------------------------------------- torznab / archive / rss
 
+    @Test fun listingWithoutDownloadLinks() {
+        fun card(n: Int, title: String, size: String, seeds: Int, age: String) = """
+            <div class="card"><div class="head"><a href="/item/$n-${title.lowercase().replace(' ', '-')}/">$title</a></div>
+              <div class="meta">Posted in <a href="/browse/?cat=music">Music - MP3</a>
+                <span class="text-success">$seeds</span> <span class="size">$size</span> <span>$age</span>
+                <a href="/user/someone/">someone</a></div></div>"""
+        val page = "<html><body><nav><a href='/'>Home</a><a href='/browse/?cat=movies'>Movies and films</a><a href='/browse/?cat=music'>Music and audio</a></nav>" +
+            card(101, "Open Background Music Pack Volume One", "412.5 MB", 41, "4 years ago") +
+            card(102, "Creative Commons Piano Collection", "1.42 GB", 7, "2 months ago") +
+            card(103, "Public Domain Orchestral Recordings", "3.1 GB", 0, "11 days ago") +
+            card(104, "Field Recordings for Film Makers", "96 MB", 12, "1 year ago") + "</body></html>"
+        val base = "https://example.org/browse/?q=music"
+        assertTrue("no magnet links, so the ordinary reader finds nothing", SiteReader.parse(page, base, "x").isEmpty())
+        val hits = SiteReader.listing(page, base, "Example", NOW)
+        assertEquals(4, hits.size)
+        val h = hits[1]
+        assertEquals("Creative Commons Piano Collection", h.title)
+        assertTrue(h.pageOnly)
+        assertEquals("https://example.org/item/102-creative-commons-piano-collection/", h.page)
+        assertEquals((1.42 * 1073741824).toLong(), h.size)
+        assertEquals(7, h.seeders)
+        assertEquals(NOW - 2 * 2592000000L, h.published)
+        assertEquals(0, hits[2].seeders)
+        assertEquals(4, hits.map { it.key }.distinct().size)
+
+        // the result's own page gives the link
+        val detail = "<html><body><h1>Creative Commons Piano Collection</h1><a href='magnet:?xt=urn:btih:$H1&dn=Piano'>Magnet</a><p>Size: 1.42 GB Seeders: 9</p></body></html>"
+        val full = SiteReader.detail(detail, h.page!!, h.title, "Example", NOW)!!
+        assertEquals(H1, full.hash); assertTrue(!full.pageOnly)
+
+        // a page of links that is not a torrent list is left alone
+        val news = "<html><body>" + (1..6).joinToString("") { "<div><a href='/news/$it-something-happened-today/'>Something happened today, part $it</a><p>Read more about it.</p></div>" } + "</body></html>"
+        assertTrue(SiteReader.listing(news, "https://example.org/news/", "x").isEmpty())
+    }
+
     @Test fun torznab() {
         val xml = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:torznab="http://torznab.com/schemas/2015/feed">
@@ -238,17 +274,19 @@ class LogicTest {
                     check(first == connId && action == 2)
                     val n = (p.length - 16) / 20
                     val r = ByteBuffer.allocate(8 + 12 * n).putInt(2).putInt(tid)
-                    for (i in 0 until n) r.putInt(100 + i).putInt(1000 + i).putInt(10 + i)
+                    for (i in 0 until n) if (i == 2) r.putInt(0).putInt(0).putInt(0) else r.putInt(100 + i).putInt(1000 + i).putInt(10 + i)
                     r.array()
                 }
                 server.send(DatagramPacket(reply, reply.size, p.address, p.port))
             }
         }
         t.start()
-        val res = Scrape.scrape(listOf(H1, H2), listOf("udp://127.0.0.1:$port/announce"), 3000)
+        val unknown = "c".repeat(40)
+        val res = Scrape.scrape(listOf(H1, H2, unknown), listOf("udp://127.0.0.1:$port/announce"), 3000)
         t.join(3000); server.close()
         assertEquals(Scrape.SL(100, 10, 1000), res[H1])
         assertEquals(Scrape.SL(101, 11, 1001), res[H2])
+        assertTrue("a torrent the tracker has never heard of is unknown, not zero", unknown !in res)
         assertTrue(Scrape.scrape(listOf(H1), listOf("udp://127.0.0.1:1/announce"), 500).isEmpty())
     }
 }

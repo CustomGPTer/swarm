@@ -1,4 +1,4 @@
-# Swarm 1.0 — torrent app for Android
+# Swarm 1.1 — torrent app for Android
 
 Original app. No ads, no analytics, no accounts. Swarm talks to the BitTorrent network, to the search
 sources you switch on, and to GitHub (at most twice a day) to see whether a newer version is out.

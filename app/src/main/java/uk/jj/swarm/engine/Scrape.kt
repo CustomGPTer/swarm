@@ -80,7 +80,10 @@ object Scrape {
             val futures = udp.map { t -> pool.submit(Callable { try { scrapeOne(t, valid, timeoutMs) } catch (e: Exception) { emptyMap() } }) }
             for (f in futures) {
                 val m = try { f.get(timeoutMs * 3L + 2000, TimeUnit.MILLISECONDS) } catch (e: Exception) { emptyMap() }
-                for ((h, sl) in m) { val cur = merged[h]; if (cur == null || sl.seeders > cur.seeders) merged[h] = sl }
+                for ((h, sl) in m) {
+                    if (sl.seeders == 0 && sl.leechers == 0 && sl.completed == 0) continue   // this tracker does not know the torrent
+                    val cur = merged[h]; if (cur == null || sl.seeders > cur.seeders) merged[h] = sl
+                }
             }
         } finally { pool.shutdownNow() }
         return merged
