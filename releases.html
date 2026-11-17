@@ -38,18 +38,38 @@
 <div class="wrap">
 <div class="measure">
 <h1>Release notes</h1>
-<p class="lede">What was added, improved and fixed in each version of Swarm, newest first. The current version is 1.0.</p>
+<p class="lede">What was added, improved and fixed in each version of Swarm, newest first. The current version is 1.1.</p>
 <div class="get">
 <a class="button" href="https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk">Download the latest version</a>
-<p class="facts">Version 1.0. Android app file, 61.0 MB. Android 10 or later, 64-bit. Free.</p>
+<p class="facts">Version 1.1. Android app file, 61.0 MB. Android 10 or later, 64-bit. Free.</p>
 <p class="facts">Chrome may say the file might be harmful. It shows this for app files that do not come from Google Play. Choose Download anyway. To be sure of the file, see <a href="#checking">Checking your download</a>.</p>
 </div>
-<nav class="contents" aria-label="Versions"><strong>Versions</strong><ul><li><a href="#v1-0">1.0&ensp;First release</a></li></ul></nav>
+<nav class="contents" aria-label="Versions"><strong>Versions</strong><ul><li><a href="#v1-1">1.1&ensp;A crawler that keeps going</a></li><li><a href="#v1-0">1.0&ensp;First release</a></li></ul></nav>
+
+<article class="release" id="v1-1">
+<p class="ver">Version 1.1</p>
+<h2>A crawler that keeps going</h2>
+<p class="when"><span class="tag">Latest</span>Released 17 November 2026</p>
+<h3>Fixed</h3>
+<ul>
+<li>The DHT crawler could stop collecting once Swarm had been sent to the background and brought back, while still looking switched on. The index then barely grew.</li>
+<li>The Newest, Seeders and Biggest buttons on the DHT tab did nothing unless you had typed a search.</li>
+<li>After a change of sort order, the Search and DHT lists stayed on the row you were looking at, so the new order was out of sight. They now go back to the top.</li>
+<li>Results from the Internet Archive showed no seeders and a red dot. They are web seeded, and now say so. A tracker that has never heard of a torrent no longer counts as nobody sharing it.</li>
+</ul>
+<h3>Improved</h3>
+<ul>
+<li>The crawler fetches the details of four times as many torrents at once, and asks more of the network for torrents to look at.</li>
+<li>Torrents in the DHT index show the seeders and peers seen when they were found.</li>
+<li>Website sources that list results without download links now work. Swarm shows the list, and gets the link from the result's own page when you tap Download. If that page only shows its link after a tap, Swarm opens it in its browser and picks the link up when you tap it.</li>
+<li>Websites that build their results with scripts, or check for a browser first, are read the way a browser reads them.</li>
+<li>The Test button for a new source says when a site keeps its download links on each result's own page.</li>
+</ul>
+</article>
 
 <article class="release" id="v1-0">
 <p class="ver">Version 1.0</p>
 <h2>First release</h2>
-<p class="when"><span class="tag">Latest</span>Released 17 November 2026</p>
 <h3>Added</h3>
 <ul>
 <li>The Torrents tab, with All, Downloading and Complete lists, pause and resume for one torrent or all of them, a filter, and selection for sharing or deleting several at once.</li>
@@ -83,8 +103,8 @@
 <li>Every version is signed with the same key, so Android accepts an update only if it comes from the same developer.</li>
 </ul>
 <h2 id="checking">Checking your download</h2>
-<p>The file for version 1.0 is 61,034,548 bytes. Its SHA-256 checksum is:</p>
-<p class="sum"><code>2af760183c3349e30f3551dde1542e7f23f7f54745b9c7f1a2c79bc1deb10c7d</code></p>
+<p>The file for version 1.1 is 61,045,892 bytes. Its SHA-256 checksum is:</p>
+<p class="sum"><code>29e218ec30f0ba2e8cc0b9152c12f78db0663b25471568a0e68cd67eeffe8012</code></p>
 <p>Earlier downloads and their files are listed on <a href="https://github.com/CustomGPTer/swarm/releases">GitHub Releases</a>, and the <a href="https://github.com/CustomGPTer/swarm/tree/source">source code</a> is on GitHub. To report a problem with a version, <a href="https://github.com/CustomGPTer/swarm/issues">open an issue on GitHub</a>.</p>
 </div>
 </div>
