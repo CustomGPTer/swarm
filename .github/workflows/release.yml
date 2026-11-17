@@ -1,0 +1,22 @@
+# Publishes a release with the app file held on the dist branch.
+# Run it from the Actions tab and give the version, such as 1.1.
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, such as 1.1
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dist
+      - name: Publish the release
+        run: gh release create "v${{ inputs.version }}" Swarm.apk --target main --title "Swarm ${{ inputs.version }}" --notes-file NOTES.md
+        env:
+          GH_TOKEN: ${{ github.token }}
