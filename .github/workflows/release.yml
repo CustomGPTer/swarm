@@ -1,0 +1,20 @@
+# Publishes a release whenever a new app file is pushed to this branch.
+# VERSION holds the version number, NOTES.md the release notes, Swarm.apk the app.
+name: Release
+on:
+  push:
+    branches: [dist]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish the release
+        run: |
+          v="$(tr -d ' \n\r' < VERSION)"
+          if gh release view "v$v" >/dev/null 2>&1; then echo "v$v is already released"; exit 0; fi
+          gh release create "v$v" Swarm.apk --target main --title "Swarm $v" --notes-file NOTES.md
+        env:
+          GH_TOKEN: ${{ github.token }}
