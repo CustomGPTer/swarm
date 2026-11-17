@@ -1,11 +1,8 @@
-First release of Swarm, a free torrent app for Android that finds torrents too.
+Fixes the DHT crawler, the sort buttons and website sources.
 
-- Keyword search across open catalogues and sources you add, with seeders, leechers, size and age on every result
-- A DHT tab: a searchable index of torrents, built and kept on your phone
-- Magnet links, torrent files and QR codes; choose which files to download; play a video while it downloads
-- Wi-Fi only from the start, speed limits, scheduled hours, a battery saver and Auto-Shutdown
-- Seeding to a ratio, a warning when no VPN is on, safety checks on results, encryption and a blocklist
-- RSS feeds, a watchlist for saved searches, built-in video and music players, and making your own torrents
-- Light and dark themes, and a backup file for your list, sources and settings
+- The DHT crawler could stop collecting after Swarm was sent to the background and brought back. It now keeps going, and fetches four times as many torrents at once
+- The Newest, Seeders and Biggest buttons on the DHT tab now work without a search, and a change of sort order goes back to the top of the list
+- Internet Archive results say they are web seeded, not "0 seeders"; a tracker that has never heard of a torrent no longer counts as zero
+- Website sources that list results without download links now work: Swarm gets the link from the result's own page when you tap Download, or opens the page for you to tap it
 
-Android 10 or later, 64-bit. Install `Swarm.apk` below. Full notes: https://customgpter.github.io/swarm/releases.html
+Android 10 or later, 64-bit. Install `Swarm.apk` below, over the version you have. Full notes: https://customgpter.github.io/swarm/releases.html
