@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Swarm</string>
+    <string name="widget_desc">Speeds, active downloads, pause and resume</string>
+</resources>

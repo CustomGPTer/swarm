@@ -1,0 +1,403 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("linuxtracker-theme");
+        const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme =
+          saved || (systemDark ? "dark" : "light");
+      } catch (_) {
+        document.documentElement.dataset.theme = "light";
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.querySelector(".theme-toggle");
+        if (!button) return;
+
+        const updateButton = () => {
+          const dark = document.documentElement.dataset.theme === "dark";
+          button.textContent = dark ? "☀" : "☾";
+          button.setAttribute(
+            "aria-label",
+            dark ? "Switch to light mode" : "Switch to dark mode"
+          );
+          button.setAttribute(
+            "title",
+            dark ? "Switch to light mode" : "Switch to dark mode"
+          );
+        };
+
+        updateButton();
+
+        button.addEventListener("click", () => {
+          const next =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+
+          document.documentElement.dataset.theme = next;
+
+          try {
+            localStorage.setItem("linuxtracker-theme", next);
+          } catch (_) {}
+
+          updateButton();
+        });
+      });
+    })();
+  </script>
+  <!-- Google tag consent defaults -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    (() => {
+      let analyticsConsent = "denied";
+
+      try {
+        if (
+          localStorage.getItem("linuxtracker-analytics-consent") === "granted"
+        ) {
+          analyticsConsent = "granted";
+        }
+      } catch (_) {}
+
+      gtag("consent", "default", {
+        analytics_storage: analyticsConsent,
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        wait_for_update: 500
+      });
+    })();
+
+    gtag("js", new Date());
+    gtag("config", "G-W6N12K4D4Q");
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W6N12K4D4Q"></script>
+
+  <title>ubuntustudio-26.10-desktop-amd64.iso - LinuxTracker</title>
+  <link rel="stylesheet" href="/static/css/site.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/content.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/torrents.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/torrent-actions.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/torrent-manage.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/top-torrents.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/statistics.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/info-pages.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/news.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/chat.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/accounts.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/account-detail.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/email-verification.css?v=20260923-1">
+  <link rel="stylesheet" href="/static/css/mfa.css?v=20260923-1">
+  <link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  
+</head>
+<body><a href="https://linuxtracker.org/cdn-cgi/content?id=7t88aaqEwmnod1EbB4QHAyxZd9SXjLc1xflx8_ry3wQ-1794934539.829801-1.2.1.1-vHogYhOclhU25dOt.rbvoZT_IYYEuM.pOlJqzKLQdHrlTaL.kXX5N.XfTT9wTCo9" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+
+<header class="site-header">
+  <div class="topbar shell">
+    <a class="brand" href="/">
+  <img
+    class="brand-badge"
+    src="/static/img/branding/linuxtracker-badge.png"
+    alt=""
+    width="62"
+    height="62"
+  >
+  <span class="brand-copy">
+    <span class="brand-name">Linux<span>Tracker</span></span>
+    <small>LINUX DISTRIBUTIONS. TOGETHER.</small>
+  </span>
+</a>
+    <form class="search" role="search" method="get" action="/torrents/">
+      <input type="search" name="q" placeholder="Search torrents..." aria-label="Search torrents">
+      <button type="submit">Search</button>
+    </form>
+    <div class="account">
+      <button
+        class="theme-toggle"
+        type="button"
+        aria-label="Switch color theme"
+        title="Switch color theme"
+      >☾</button>
+      
+      <a href="/accounts/login/">Login</a>
+      <a href="/accounts/register/">Register</a>
+      
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Primary navigation">
+    <div class="shell nav-inner">
+      <a href="/">Home</a>
+      <a class="active" aria-current="page" href="/torrents/">Torrents</a>
+      <a href="/torrents/top/">Top Torrents</a>
+      
+      <a href="/statistics/">Statistics</a>
+      <a href="/news/">News</a>
+      
+      <a href="https://rss.linuxtracker.org/feed.xml">RSS Feed</a>
+      
+      <a href="/chat/">Chat</a>
+      
+    </div>
+  </nav>
+</header>
+
+<main class="shell">
+<div class="torrent-detail-page">
+  <nav class="detail-breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a>
+    <span aria-hidden="true">/</span>
+    <a href="/torrents/">Torrents</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Details</span>
+  </nav>
+
+  <section class="panel torrent-detail">
+    <header class="detail-header">
+      <div class="detail-title-block">
+        <span class="detail-eyebrow">Torrent details</span>
+        <span class="category-badge">Ubuntu Studio</span>
+        <h2>ubuntustudio-26.10-desktop-amd64.iso</h2>
+        <p>6.4 GB · Added Oct 15, 2026</p>
+      </div>
+      <div class="detail-header-actions">
+        <span class="tracker-status live">
+          Live tracker stats
+        </span>
+        
+      </div>
+    </header>
+
+    <div class="torrent-detail-body">
+      
+
+      <div class="torrent-actions" aria-label="Torrent actions">
+        <a class="torrent-action primary-action" href="/torrents/f3cd8b82a4f96c36da018a503ea1f09fd9bdb7a1/download/">
+          <span class="action-icon" aria-hidden="true">↓</span>
+          <span><strong>Download .torrent</strong><small>Get the BitTorrent metadata file</small></span>
+        </a>
+        
+        <a class="torrent-action" href="magnet:?xt=urn:btih:F3CD8B82A4F96C36DA018A503EA1F09FD9BDB7A1&amp;dn=ubuntustudio-26.10-desktop-amd64.iso">
+          <span class="action-icon" aria-hidden="true">↯</span>
+          <span><strong>Open magnet link</strong><small>Send this torrent to your BitTorrent client</small></span>
+        </a>
+        
+      </div>
+
+      <div class="detail-stats" aria-label="Torrent statistics">
+        <div><span>Seeders</span><strong class="seeds">11</strong></div>
+        <div><span>Leechers</span><strong class="leeches">0</strong></div>
+        <div><span>Completed</span><strong>23</strong></div>
+      </div>
+
+      <dl class="torrent-meta compact-meta">
+        <div><dt>Category</dt><dd>Ubuntu Studio</dd></div>
+        <div><dt>Added</dt><dd>Oct 15, 2026 20:45</dd></div>
+        <div><dt>Size</dt><dd>6.4 GB</dd></div>
+        <div><dt>Tracker mode</dt><dd>Multi / external</dd></div>
+        <div class="hash-row"><dt>Info hash</dt><dd><code>f3cd8b82a4f96c36da018a503ea1f09fd9bdb7a1</code></dd></div>
+      </dl>
+
+      
+      <section class="detail-section">
+        <h3>Description</h3>
+        <div class="torrent-description formatted-content">An official variant of Ubuntu, Ubuntu Studio is a Linux-based operating system for creative individuals in the areas of audio production, video production, graphics design, photography and desktop publishing. It makes professional audio accessible on Linux; it uses the JACK sound server and a kernel built with a low-latency patch. Up until version 20.10 Ubuntu Studio shipped with the Xfce desktop environment, but this was replaced by KDE Plasma in October 2020.</div>
+      </section>
+      
+
+      
+
+      
+      <section class="detail-section tracker-section">
+        <div class="section-heading-row">
+          <h3>Tracker information</h3>
+          <span class="detail-pill">Multi-tracker capable</span>
+        </div>
+        
+        <div class="announce-row">
+          <span>Primary tracker</span>
+          <code>http://tracker.linuxtracker.org:2710/announce</code>
+        </div>
+        
+        <div class="announce-row">
+          <span>Tracker 2</span>
+          <code>https://torrent.ubuntu.com/announce</code>
+        </div>
+        
+      </section>
+      
+
+
+      
+    </div>
+  </section>
+
+  <div class="detail-footer-nav">
+    <a class="back-button" href="/torrents/">
+      <span aria-hidden="true">←</span>
+      <span>Back to torrent list</span>
+    </a>
+  </div>
+</div>
+
+<dialog class="torrent-image-viewer" id="torrent-image-viewer" aria-label="Full-size torrent image">
+  <button class="image-viewer-close" type="button" aria-label="Close image viewer">×</button>
+  <img src="" alt="">
+</dialog>
+
+<script>
+(() => {
+  const viewer = document.getElementById("torrent-image-viewer");
+  if (!viewer) return;
+
+  const viewerImage = viewer.querySelector("img");
+  const closeButton = viewer.querySelector(".image-viewer-close");
+  const triggers = document.querySelectorAll("[data-image-src]");
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      viewerImage.src = trigger.dataset.imageSrc;
+      viewerImage.alt = trigger.dataset.imageAlt || "Torrent image";
+      viewer.showModal();
+    });
+  });
+
+  closeButton.addEventListener("click", () => viewer.close());
+  viewer.addEventListener("click", (event) => {
+    if (event.target === viewer) viewer.close();
+  });
+  viewer.addEventListener("close", () => {
+    viewerImage.src = "";
+    viewerImage.alt = "";
+  });
+})();
+</script>
+</main>
+
+<footer>
+  <div class="shell">
+    © LinuxTracker.org
+    <span class="footer-tagline">Linux distributions. Together.</span>
+    <span class="site-version" title="LinuxTracker application version">v0.9.0</span>
+    <nav aria-label="Footer navigation">
+      <a href="/about/">About</a>
+      <a href="/faq/">FAQ</a>
+      <a href="/rules/">Rules</a>
+      <a href="/privacy/">Privacy</a>
+      <button class="cookie-settings-link" type="button">Cookie settings</button>
+    <a href="/contact/">Contact</a>
+    </nav>
+  </div>
+</footer>
+<section
+  class="cookie-consent"
+  id="cookie-consent-banner"
+  aria-label="Analytics cookie preferences"
+  aria-live="polite"
+  hidden
+>
+  <div class="cookie-consent-inner shell">
+    <div class="cookie-consent-copy">
+      <strong>Analytics preferences</strong>
+      <p>
+        LinuxTracker uses Google Analytics to understand how the site is used.
+        Analytics storage is disabled unless you choose to allow it.
+        <a href="/privacy/">Privacy policy</a>
+      </p>
+    </div>
+
+    <div class="cookie-consent-actions">
+      <button class="cookie-consent-reject" type="button">
+        Reject analytics
+      </button>
+      <button class="cookie-consent-accept" type="button">
+        Accept analytics
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const storageKey = "linuxtracker-analytics-consent";
+
+    const readConsent = () => {
+      try {
+        return localStorage.getItem(storageKey);
+      } catch (_) {
+        return null;
+      }
+    };
+
+    const saveConsent = (value) => {
+      try {
+        localStorage.setItem(storageKey, value);
+      } catch (_) {}
+    };
+
+    const updateGoogleConsent = (analyticsConsent) => {
+      if (typeof gtag !== "function") return;
+
+      gtag("consent", "update", {
+        analytics_storage: analyticsConsent,
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied"
+      });
+    };
+
+    const banner = document.getElementById("cookie-consent-banner");
+    const acceptButton = banner?.querySelector(".cookie-consent-accept");
+    const rejectButton = banner?.querySelector(".cookie-consent-reject");
+    const settingsButtons = document.querySelectorAll(
+      ".cookie-settings-link"
+    );
+
+    const showBanner = () => {
+      if (!banner) return;
+      banner.hidden = false;
+    };
+
+    const hideBanner = () => {
+      if (!banner) return;
+      banner.hidden = true;
+    };
+
+    const chooseConsent = (value) => {
+      saveConsent(value);
+      updateGoogleConsent(value);
+      hideBanner();
+    };
+
+    acceptButton?.addEventListener("click", () => {
+      chooseConsent("granted");
+    });
+
+    rejectButton?.addEventListener("click", () => {
+      chooseConsent("denied");
+    });
+
+    settingsButtons.forEach((button) => {
+      button.addEventListener("click", showBanner);
+    });
+
+    if (!["granted", "denied"].includes(readConsent())) {
+      showBanner();
+    }
+  })();
+</script>
+
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5c043a9ebb1d1b4',t:'MTc5NDkzNDUzOQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5c043a9ebb1d1b4',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

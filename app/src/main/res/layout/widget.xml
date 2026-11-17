@@ -1,0 +1,16 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:background="@drawable/widget_bg" android:padding="14dp" android:gravity="center_vertical">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Swarm"
+        android:textColor="#CCFFFFFF" android:textSize="12sp"/>
+    <TextView android:id="@+id/w_speed" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="↓ 0 B/s   ↑ 0 B/s" android:textColor="#FFFFFFFF" android:textSize="17sp" android:textStyle="bold" android:maxLines="1"/>
+    <TextView android:id="@+id/w_status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Open Swarm to start" android:textColor="#E6FFFFFF" android:textSize="12sp" android:maxLines="1" android:ellipsize="end"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:id="@+id/w_pause" android:layout_width="0dp" android:layout_weight="1" android:layout_height="34dp" android:gravity="center"
+            android:text="Pause all" android:textColor="#FFFFFFFF" android:textSize="13sp" android:background="@drawable/widget_btn" android:layout_marginEnd="6dp"/>
+        <TextView android:id="@+id/w_resume" android:layout_width="0dp" android:layout_weight="1" android:layout_height="34dp" android:gravity="center"
+            android:text="Resume all" android:textColor="#FFFFFFFF" android:textSize="13sp" android:background="@drawable/widget_btn" android:layout_marginStart="6dp"/>
+    </LinearLayout>
+</LinearLayout>
