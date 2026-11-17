@@ -50,11 +50,13 @@ import java.io.RandomAccessFile
  */
 @UnstableApi
 class TorrentDataSource(private val info: StreamInfo) : BaseDataSource(true) {
+    private val cache = uk.jj.swarm.engine.PieceCache.of(info)
     private var raf: RandomAccessFile? = null
     private var uri: Uri? = null
     private var pos = 0L
     private var remaining = 0L
     private var opened = false
+    private var lastPiece = -1
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)
@@ -77,6 +79,8 @@ class TorrentDataSource(private val info: StreamInfo) : BaseDataSource(true) {
         val abs = info.fileOffset + pos
         val piece = (abs / info.pieceLength).toInt()
         waitPiece(piece)
+        // Each time the player moves into a new piece, ask for the ones after it, so it rarely has to stop and wait.
+        if (piece != lastPiece) { lastPiece = piece; cache.want(piece + 1, info.window, info.lastPiece) }
         val pieceEnd = (piece + 1).toLong() * info.pieceLength - info.fileOffset
         val n = minOf(length.toLong(), remaining, pieceEnd - pos).toInt()
         val f = raf ?: throw IOException("closed")
@@ -92,14 +96,18 @@ class TorrentDataSource(private val info: StreamInfo) : BaseDataSource(true) {
     }
 
     private fun waitPiece(p: Int) {
-        if (Engine.havePiece(info.hash, p)) return
-        Engine.wantPieces(info.hash, p, 10, info.numPieces)
-        var waited = 0
-        while (!Engine.havePiece(info.hash, p)) {
-            sleep(150); waited += 150
-            if (waited % 3000 == 0) Engine.wantPieces(info.hash, p, 10, info.numPieces)
-            if (waited > 180000) throw IOException("Timed out waiting for this part of the video. Check seeders and connection.")
-        }
+        if (cache.has(p)) return
+        cache.want(p, info.window, info.lastPiece)
+        StreamStatus.waiting(info, p)
+        try {
+            var waited = 0
+            while (!cache.has(p)) {
+                sleep(250); waited += 250
+                if (waited % 5000 == 0) cache.want(p, info.window, info.lastPiece)
+                if (waited == 20000) cache.urgent(p)
+                if (waited > 180000) throw IOException("Timed out waiting for this part of the video. Check seeders and connection.")
+            }
+        } finally { StreamStatus.arrived(info, p) }
     }
 
     private fun sleep(ms: Long) { try { Thread.sleep(ms) } catch (e: InterruptedException) { throw InterruptedIOException() } }
@@ -114,8 +122,54 @@ class TorrentDataSource(private val info: StreamInfo) : BaseDataSource(true) {
     }
 }
 
+/** What the player is waiting for, so the screen can say so and not just spin. */
+object StreamStatus {
+    @Volatile private var info: StreamInfo? = null
+    @Volatile private var piece = -1
+    @Volatile private var since = 0L
+
+    fun waiting(i: StreamInfo, p: Int) { info = i; piece = p; since = System.currentTimeMillis() }
+    fun arrived(i: StreamInfo, p: Int) { if (piece == p) piece = -1 }
+    fun clear() { piece = -1; info = null }
+
+    /** Two short lines for the screen, or null when nothing is being waited for. */
+    fun text(): String? {
+        val i = info ?: return null
+        val p = piece
+        if (p < 0) return null
+        val tailFrom = i.lastPiece - ((8L * 1024 * 1024) / i.pieceLength).toInt().coerceAtLeast(1)
+        val what = when {
+            p - i.firstPiece <= i.window -> "Getting the start of the video"
+            p >= tailFrom -> "Getting the index at the end of the file"
+            else -> "Waiting for the next part to download"
+        }
+        val t = Engine.torrents.value.firstOrNull { it.hash == i.hash }
+        val secs = (System.currentTimeMillis() - since) / 1000
+        val swarm = when {
+            t == null -> ""
+            t.state == uk.jj.swarm.engine.TState.PAUSED -> "The torrent is paused. Resume it to carry on."
+            t.seeds + t.peers == 0 -> "Not connected to anyone sharing it right now"
+            else -> "${t.seeds + t.peers} connected · ${uk.jj.swarm.Fmt.speed(t.dl.toLong())}"
+        }
+        return what + (if (secs >= 5) " (${secs}s)" else "…") + (if (swarm.isEmpty()) "" else "\n" + swarm)
+    }
+}
+
 @OptIn(UnstableApi::class)
 class PlayerActivity : ComponentActivity() {
+    private var status: android.widget.TextView? = null
+    private var streaming = false
+    private var opened = false
+    private val ui = android.os.Handler(android.os.Looper.getMainLooper())
+    private val statusTick = object : Runnable {
+        override fun run() {
+            val p = player
+            val busy = p == null || p.playbackState == Player.STATE_BUFFERING || p.playbackState == Player.STATE_IDLE
+            val t = if (!opened) "Opening…" else if (busy && streaming) StreamStatus.text() else null
+            status?.let { v -> v.text = t ?: ""; v.visibility = if (t == null) android.view.View.GONE else android.view.View.VISIBLE }
+            ui.postDelayed(this, 500)
+        }
+    }
     private var player: ExoPlayer? = null
     private var path = ""
     private var musicWasPlaying = false
@@ -125,10 +179,27 @@ class PlayerActivity : ComponentActivity() {
             ctx.startActivity(Intent(ctx, PlayerActivity::class.java).putExtra("path", uri.toString()).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
         }
 
+        @Volatile private var lastStart = 0L
+        @Volatile private var pending: String? = null     // asked to open, not on screen yet
+        @Volatile private var showing: String? = null     // on screen now
+
         fun start(ctx: Context, file: File, title: String, hash: String? = null, index: Int = -1) {
-            ctx.startActivity(Intent(ctx, PlayerActivity::class.java).putExtra("path", file.absolutePath).putExtra("title", title).putExtra("hash", hash).putExtra("index", index)
+            // A second tap while the player is opening, or already showing the same file, must not open another one.
+            val now = android.os.SystemClock.elapsedRealtime()
+            val path = file.absolutePath
+            if (showing == path || (pending == path && now - lastStart < 8000)) return
+            lastStart = now; pending = path
+            ctx.startActivity(Intent(ctx, PlayerActivity::class.java).putExtra("path", path).putExtra("title", title).putExtra("hash", hash).putExtra("index", index)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .apply { if (ctx !is android.app.Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val p = intent.getStringExtra("path") ?: return
+        if (p == path) return            // the same video is already on screen
+        setIntent(intent); recreate()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,25 +232,18 @@ class PlayerActivity : ComponentActivity() {
         view.keepScreenOn = true
         setContentView(view)
 
-        val stream = if (!isContent && hash != null && index >= 0 && !Engine.fileComplete(hash, index)) Engine.stream(hash, index) else null
-        if (stream != null) {
-            Toast.makeText(this, "Playing while it downloads. It may pause to wait for data.", Toast.LENGTH_LONG).show()
-            p.setMediaSource(ProgressiveMediaSource.Factory(DataSource.Factory { TorrentDataSource(stream) }).createMediaSource(MediaItem.fromUri(Uri.fromFile(file))))
-        } else {
-            val b = MediaItem.Builder().setUri(mediaUri)
-            val subs = ArrayList<MediaItem.SubtitleConfiguration>()
-            val base = file.nameWithoutExtension
-            if (!isContent) file.parentFile?.listFiles()?.forEach { f ->
-                if (f.isFile && f.name.startsWith(base) && f != file) {
-                    val mime = when (f.extension.lowercase()) { "srt" -> MimeTypes.APPLICATION_SUBRIP; "vtt" -> MimeTypes.TEXT_VTT; "ass", "ssa" -> MimeTypes.TEXT_SSA; else -> null }
-                    if (mime != null) subs += MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(f)).setMimeType(mime).setLabel(f.name.removePrefix(base).trim('.', ' ').ifBlank { "Subtitles" }).setSelectionFlags(0).build()
-                }
-            }
-            if (subs.isNotEmpty()) b.setSubtitleConfigurations(subs)
-            p.setMediaItem(b.build())
+        // Status line under the spinner: says what is being waited for.
+        val st = android.widget.TextView(this).apply {
+            setTextColor(0xFFFFFFFF.toInt()); textSize = 14f; gravity = android.view.Gravity.CENTER_HORIZONTAL
+            setShadowLayer(4f, 0f, 1f, 0xFF000000.toInt()); text = "Opening…"
         }
-        val saved = Db.get(this).position(path)
-        if (saved > 5000) p.seekTo(saved)
+        status = st
+        val d = resources.displayMetrics.density
+        addContentView(st, android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.MATCH_PARENT, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+            android.view.Gravity.CENTER).apply { topMargin = (86 * d).toInt(); leftMargin = (24 * d).toInt(); rightMargin = (24 * d).toInt() })
+        showing = path; if (pending == path) pending = null
+        ui.post(statusTick)
+
         p.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 if (isFinishing) return
@@ -194,14 +258,50 @@ class PlayerActivity : ComponentActivity() {
                 if (state == Player.STATE_ENDED) { Db.get(this@PlayerActivity).savePosition(path, 0, p.duration.coerceAtLeast(0)); finish() }
             }
         })
-        p.prepare()
-        p.playWhenReady = true
+
+        // Asking the engine about the file, and the database for the place last reached, can both take a moment
+        // when the phone is busy. Neither may hold up the screen, so they run on their own thread.
+        Thread({
+            val stream = try { if (!isContent && hash != null && index >= 0 && !Engine.fileComplete(hash, index)) Engine.stream(hash, index) else null } catch (t: Throwable) { null }
+            val subs = ArrayList<MediaItem.SubtitleConfiguration>()
+            if (stream == null && !isContent) try {
+                val base = file.nameWithoutExtension
+                file.parentFile?.listFiles()?.forEach { f ->
+                    if (f.isFile && f.name.startsWith(base) && f != file) {
+                        val mime = when (f.extension.lowercase()) { "srt" -> MimeTypes.APPLICATION_SUBRIP; "vtt" -> MimeTypes.TEXT_VTT; "ass", "ssa" -> MimeTypes.TEXT_SSA; else -> null }
+                        if (mime != null) subs += MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(f)).setMimeType(mime).setLabel(f.name.removePrefix(base).trim('.', ' ').ifBlank { "Subtitles" }).setSelectionFlags(0).build()
+                    }
+                }
+            } catch (t: Throwable) { }
+            val saved = try { Db.get(this).position(path) } catch (t: Throwable) { 0L }
+            ui.post {
+                if (isFinishing || isDestroyed || player !== p) return@post
+                if (stream != null) {
+                    streaming = true; Engine.streaming.incrementAndGet()
+                    Toast.makeText(this, "Playing while it downloads. It may pause to wait for data.", Toast.LENGTH_LONG).show()
+                    p.setMediaSource(ProgressiveMediaSource.Factory(DataSource.Factory { TorrentDataSource(stream) }).createMediaSource(MediaItem.fromUri(Uri.fromFile(file))))
+                } else {
+                    val b = MediaItem.Builder().setUri(mediaUri)
+                    if (subs.isNotEmpty()) b.setSubtitleConfigurations(subs)
+                    p.setMediaItem(b.build())
+                }
+                if (saved > 5000) p.seekTo(saved)
+                p.prepare()
+                p.playWhenReady = true
+                opened = true
+            }
+        }, "swarm-player-open").start()
     }
 
     private fun savePos() {
         val p = player ?: return
+        if (!opened) return
         val pos = p.currentPosition; val dur = p.duration
-        if (dur > 0) Db.get(this).savePosition(path, if (pos > dur - 15000) 0 else pos, dur) else if (pos > 0) Db.get(this).savePosition(path, pos, 0)
+        val at = path; val app = applicationContext
+        // The database can be busy. Never make the screen wait for it.
+        Thread {
+            try { if (dur > 0) Db.get(app).savePosition(at, if (pos > dur - 15000) 0 else pos, dur) else if (pos > 0) Db.get(app).savePosition(at, pos, 0) } catch (t: Throwable) { }
+        }.start()
     }
 
     override fun onUserLeaveHint() {
@@ -223,6 +323,9 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onDestroy() {
         savePos()
+        ui.removeCallbacksAndMessages(null)
+        if (showing == path) showing = null
+        if (streaming) { streaming = false; Engine.streaming.decrementAndGet(); StreamStatus.clear() }
         player?.release(); player = null
         if (musicWasPlaying && Prefs.resumeMusic) Music.resume()
         super.onDestroy()

@@ -84,6 +84,16 @@ object Crawler {
         }
     }
 
+    /**
+     * How many detail fetches may run at once. The crawler shares the engine and the connection with the user's
+     * own downloads, so it stands aside while a video is playing and runs gently while anything is downloading.
+     */
+    fun allowed(): Int = when {
+        Engine.streaming.get() > 0 -> 0
+        Engine.global.value.downloading > 0 -> 6
+        else -> FETCHERS
+    }
+
     private fun canWork() = Engine.ready.value && Engine.blocked.value == null && Engine.networkAllowed() && Engine.sm.isDhtRunning
 
     private suspend fun run() {
@@ -93,7 +103,7 @@ object Crawler {
             val db = Db.get(Engine.app)
             coroutineScope {
                 launch { sampler() }
-                repeat(FETCHERS) { launch(Dispatchers.IO) { fetcher(db) } }
+                repeat(FETCHERS) { n -> launch(Dispatchers.IO) { fetcher(db, n) } }
                 launch(Dispatchers.IO) { scraper(db) }
                 launch(Dispatchers.IO) {
                     while (isActive) {
@@ -121,13 +131,14 @@ object Crawler {
 
     private suspend fun sampler() {
         while (currentCoroutineContext().isActive) {
-            if (!canWork()) { delay(3000); continue }
+            val room = allowed()
+            if (!canWork() || room == 0) { delay(3000); continue }
             val qs = synchronized(queue) { queue.size }
             if (qs < 1500) {
                 if (synchronized(pool) { pool.size } < 30) refill()
                 val now = System.currentTimeMillis()
                 var sent = 0; var looked = 0
-                while (sent < 24 && looked++ < 200) {
+                while (sent < room && looked++ < 200) {
                     val ep = synchronized(pool) { pool.removeFirstOrNull() } ?: break
                     // A node asks not to be sampled again for a while, so leave each one alone for half an hour.
                     val key = try { ep.toString() } catch (t: Throwable) { continue }
@@ -141,9 +152,9 @@ object Crawler {
         }
     }
 
-    private suspend fun fetcher(db: Db) {
+    private suspend fun fetcher(db: Db, n: Int) {
         while (currentCoroutineContext().isActive) {
-            if (!canWork()) { delay(3000); continue }
+            if (!canWork() || n >= allowed()) { delay(3000); continue }
             val hash = poll()
             if (hash == null) { delay(700); continue }
             try { indexOne(db, hash, "magnet:?xt=urn:btih:$hash") } catch (t: Throwable) { Log.w("Swarm", "crawl fetch", t) }

@@ -58,6 +58,7 @@ fun DetailScreen(hash: String, nav: NavHostController) {
     var del by remember { mutableStateOf(false) }
     var qr by remember { mutableStateOf(false) }
     var limits by remember { mutableStateOf(false) }
+    var opening by remember { mutableStateOf(false) }
     var files by remember { mutableStateOf<List<TFile>>(emptyList()) }
     var peers by remember { mutableStateOf<List<PeerRow>>(emptyList()) }
     var trackers by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -102,10 +103,22 @@ fun DetailScreen(hash: String, nav: NavHostController) {
     }) {
         SubTabs(listOf("Info", "Files", "Peers", "Trackers"), tab) { tab = it }
         when (tab) {
-            0 -> InfoTab(t, pieces, history) {
-                val f = files.ifEmpty { Engine.files(hash) }
-                val v = f.filter { Kind.isVideo(it.path) }.maxByOrNull { it.size }
-                if (v == null) Ui.say("No video file found in this torrent yet") else Engine.filePath(hash, v.index)?.let { Actions.open(ctx, it, hash, v.index) }
+            0 -> InfoTab(t, pieces, history, opening) {
+                // One tap, one player. The button shows it has been pressed, and looking up the file does not hold up the screen.
+                if (!opening) {
+                    opening = true
+                    scope.launch {
+                        try {
+                            val target = withContext(Dispatchers.IO) {
+                                val f = files.ifEmpty { Engine.files(hash) }
+                                val v = f.filter { Kind.isVideo(it.path) }.maxByOrNull { it.size }
+                                if (v == null) null else Engine.filePath(hash, v.index)?.let { it to v.index }
+                            }
+                            if (target == null) Ui.say("No video file found in this torrent yet") else Actions.open(ctx, target.first, hash, target.second)
+                            delay(2000)
+                        } finally { opening = false }
+                    }
+                }
             }
             1 -> FilesTab(hash, files) { files = Engine.files(hash) }
             2 -> if (peers.isEmpty()) EmptyState("No peers connected right now.", "") else LazyColumn(Modifier.weight(1f)) {
@@ -140,7 +153,7 @@ fun DetailScreen(hash: String, nav: NavHostController) {
 }
 
 @Composable
-private fun ColumnScope.InfoTab(t: TItem, pieces: FloatArray, history: List<Int>, onPlay: () -> Unit) {
+private fun ColumnScope.InfoTab(t: TItem, pieces: FloatArray, history: List<Int>, opening: Boolean, onPlay: () -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
     val track = MaterialTheme.colorScheme.surfaceVariant
     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 20.dp)) {
@@ -149,7 +162,10 @@ private fun ColumnScope.InfoTab(t: TItem, pieces: FloatArray, history: List<Int>
                 Text("${(t.progress * 100).toInt()}%", fontSize = 34.sp, fontWeight = FontWeight.Bold, color = primary)
                 Text(stateLine(t), fontSize = 14.sp, color = if (t.state == TState.ERROR) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            FilledTonalButton(onClick = onPlay, shape = RoundedCornerShape(22.dp)) { Icon(Icons.Filled.PlayArrow, null); Spacer(Modifier.width(4.dp)); Text(if (t.completed) "Play" else "Play now") }
+            FilledTonalButton(onClick = onPlay, enabled = !opening, shape = RoundedCornerShape(22.dp)) {
+                if (opening) { CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp); Spacer(Modifier.width(8.dp)); Text("Opening…") }
+                else { Icon(Icons.Filled.PlayArrow, null); Spacer(Modifier.width(4.dp)); Text(if (t.completed) "Play" else "Play now") }
+            }
         }
         LinearProgressIndicator(progress = { t.progress }, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(6.dp).clip(RoundedCornerShape(3.dp)), trackColor = track, gapSize = 0.dp, drawStopIndicator = {})
 

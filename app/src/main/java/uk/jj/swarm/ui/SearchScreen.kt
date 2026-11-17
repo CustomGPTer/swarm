@@ -285,6 +285,7 @@ fun DhtScreen(nav: NavHostController, openMenu: () -> Unit) {
                         mode == 0 -> "Crawler is switched off"
                         blocked != null -> "Crawler waiting: $blocked"
                         !Engine.networkAllowed() -> "Crawler waiting for an allowed connection"
+                        running && Engine.streaming.get() > 0 -> "Crawler paused while a video is playing"
                         running && !Engine.ready.value -> "Crawler starting…"
                         running -> "Crawling · ${stats.nodes} DHT nodes · ${stats.added} added this session · ${stats.queued} queued"
                         else -> "Crawler idle"

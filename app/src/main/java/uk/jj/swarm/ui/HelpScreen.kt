@@ -153,7 +153,7 @@ object Help {
                 "Files" to "Everything inside the torrent. Untick a file to skip it. Tap a finished file to open it. Press and hold to open it in another app.",
                 "Peers" to "The people you are connected to right now.",
                 "Trackers" to "The servers helping this torrent find people. You can add another one.",
-                "Play now" to "Starts a video before it has finished. Swarm switches to downloading it in order, start to finish, so there is something to play.",
+                "Play now" to "Starts a video before it has finished. Swarm fetches the parts the player needs first: the start, a small index at the very end of the file, then on from wherever you are watching. Under the spinner it says what it is waiting for. A few seconds is normal, and so is a short wait each time you jump to a new place.",
                 "The three dots" to "Copy the magnet link, show a QR code, set speed limits for this torrent only, move it up or down the queue, ask the trackers again, re-check the files, or delete.",
             ),
             h("Deleting"),
@@ -293,7 +293,7 @@ object Help {
             h("Using the tab"),
             points(
                 "The switch" to "Turns the crawler on or off.",
-                "The line under the count" to "Crawling means it is working, and shows how many it has added. Waiting means your settings are holding it back, for example Wi-Fi only while you are on mobile data.",
+                "The line under the count" to "Crawling means it is working, and shows how many it has added. Waiting means your settings are holding it back, for example Wi-Fi only while you are on mobile data. The crawler slows right down while you are downloading, and pauses while a video plays, so it never gets in their way.",
                 "The search box" to "Searches the index by name. Type words and tap the magnifying glass.",
                 "Newest, Seeders, Biggest" to "Changes the order of the list.",
             ),

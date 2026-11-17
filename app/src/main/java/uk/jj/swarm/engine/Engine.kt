@@ -64,7 +64,69 @@ data class Global(val dl: Long = 0, val ul: Long = 0, val dhtNodes: Long = 0, va
 data class TFile(val index: Int, val path: String, val size: Long, val done: Long, val priority: Int)
 data class PeerRow(val ip: String, val client: String, val dl: Int, val ul: Int, val progress: Float)
 data class Meta(val name: String, val size: Long, val files: List<Pair<String, Long>>, val seeds: Int = -1, val peers: Int = -1)
-data class StreamInfo(val hash: String, val fileIndex: Int, val file: File, val size: Long, val fileOffset: Long, val pieceLength: Int, val numPieces: Int)
+data class StreamInfo(val hash: String, val fileIndex: Int, val file: File, val size: Long, val fileOffset: Long, val pieceLength: Int, val numPieces: Int) {
+    val firstPiece: Int get() = (fileOffset / pieceLength).toInt()
+    val lastPiece: Int get() = ((fileOffset + maxOf(size, 1) - 1) / pieceLength).toInt()
+    /**
+     * How many pieces to ask for ahead of the player: about 5 MB, whatever the piece size. Kept modest on purpose.
+     * Urgent requests jump every queue, and asking one peer for too much at once can stall it.
+     */
+    val window: Int get() = ((5L * 1024 * 1024 + pieceLength - 1) / pieceLength).toInt().coerceIn(2, 12)
+}
+
+/**
+ * Which pieces of a torrent have arrived, remembered on this side so the player does not have to ask the
+ * engine on every read. Asking is a round trip to the engine's network thread, which is slow when it is busy.
+ */
+class PieceCache(val hash: String, private val numPieces: Int) {
+    private val have = java.util.BitSet(numPieces)
+    @Volatile private var handle: TorrentHandle? = null
+    @Volatile private var lastRefresh = 0L
+
+    private fun handle(): TorrentHandle? = handle?.takeIf { it.isValid } ?: Engine.find(hash)?.also { handle = it }
+
+    /** One question to the engine brings back every piece that has arrived, so reading on needs no more questions. */
+    private fun refresh() {
+        val now = System.currentTimeMillis()
+        if (now - lastRefresh < 250) return
+        lastRefresh = now
+        try {
+            val bf = handle()?.status(TorrentHandle.QUERY_PIECES)?.pieces() ?: return
+            val n = minOf(bf.size(), numPieces)
+            synchronized(have) { for (i in 0 until n) if (!have.get(i) && bf.getBit(i)) have.set(i) }
+        } catch (t: Throwable) { }
+    }
+
+    fun has(piece: Int): Boolean {
+        if (synchronized(have) { have.get(piece) }) return true
+        refresh()
+        return synchronized(have) { have.get(piece) }
+    }
+
+    /**
+     * Puts these pieces at the front of the ordinary queue. They are not made "urgent" (given a deadline):
+     * an urgent piece jumps every queue at once, and on a fast connection that can swamp a peer until it
+     * stops answering for a minute, which is what kept the player waiting.
+     */
+    fun want(from: Int, count: Int, last: Int) {
+        try {
+            val h = handle() ?: return
+            for (p in from..minOf(last, from + count - 1)) {
+                if (p < 0 || synchronized(have) { have.get(p) }) continue
+                h.piecePriority(p, Priority.TOP_PRIORITY)
+            }
+        } catch (t: Throwable) { }
+    }
+
+    /** Last resort for one piece that still has not come after a long wait: let the engine ask a second peer for it. */
+    fun urgent(piece: Int) { try { handle()?.setPieceDeadline(piece, 500) } catch (t: Throwable) { } }
+
+    companion object {
+        private val all = HashMap<String, PieceCache>()
+        fun of(info: StreamInfo): PieceCache = synchronized(all) { all.getOrPut(info.hash) { PieceCache(info.hash, info.numPieces) } }
+        fun forget(hash: String) { synchronized(all) { all.remove(hash) } }
+    }
+}
 
 object Net {
     @Volatile var connected = false
@@ -554,7 +616,7 @@ object Engine {
 
     fun remove(hash: String, deleteFiles: Boolean) {
         val h = find(hash)
-        reg.remove(hash); db.deleteTorrent(hash); perTorrentHistory.remove(hash)
+        reg.remove(hash); db.deleteTorrent(hash); perTorrentHistory.remove(hash); PieceCache.forget(hash)
         for (ext in listOf("resume", "magnet", "torrent")) File(resumeDir, "$hash.$ext").delete()
         try { if (h != null) { if (deleteFiles) sm.remove(h, SessionHandle.DELETE_FILES) else sm.remove(h) } } catch (t: Throwable) { Log.w(TAG, "remove", t) }
     }
@@ -562,7 +624,7 @@ object Engine {
     fun magnetOf(hash: String): String = try { find(hash)?.makeMagnetUri() ?: Magnet.build(hash, reg[hash]?.name) } catch (t: Throwable) { Magnet.build(hash, reg[hash]?.name) }
 
     fun setSequential(hash: String, on: Boolean) { find(hash)?.let { if (on) it.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD) else it.unsetFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD) } }
-    fun recheck(hash: String) { find(hash)?.forceRecheck() }
+    fun recheck(hash: String) { PieceCache.forget(hash); find(hash)?.forceRecheck() }
     fun reannounce(hash: String) { find(hash)?.let { it.forceReannounce(); it.forceDHTAnnounce() } }
     fun limits(hash: String): Pair<Int, Int> { val h = find(hash) ?: return 0 to 0; return (h.downloadLimit.coerceAtLeast(0) / 1024) to (h.uploadLimit.coerceAtLeast(0) / 1024) }
     fun setLimits(hash: String, dlKb: Int, ulKb: Int) { find(hash)?.let { it.downloadLimit = if (dlKb <= 0) -1 else dlKb * 1024; it.uploadLimit = if (ulKb <= 0) -1 else ulKb * 1024 } }
@@ -620,9 +682,23 @@ object Engine {
         val ti = h.torrentFile() ?: return null
         val fs = ti.files()
         if (index !in 0 until fs.numFiles()) return null
-        try { h.filePriority(index, Priority.TOP_PRIORITY); h.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD) } catch (t: Throwable) { }
-        return StreamInfo(hash, index, File(h.savePath(), fs.filePath(index)), fs.fileSize(index), fs.fileOffset(index), ti.pieceLength(), ti.numPieces())
+        try {
+            // The file must be wanted, but not at top priority: that level is kept for the pieces the player needs next.
+            if (h.filePriority(index) == Priority.IGNORE || h.filePriority(index) == Priority.TOP_PRIORITY) h.filePriority(index, Priority.DEFAULT)
+            h.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+        } catch (t: Throwable) { }
+        val info = StreamInfo(hash, index, File(h.savePath(), fs.filePath(index)), fs.fileSize(index), fs.fileOffset(index), ti.pieceLength(), ti.numPieces())
+        // A player reads the start of a file and then, for most films, an index kept at the very end. Ask for both
+        // straight away so the end is already on its way while the start is being read.
+        val cache = PieceCache.of(info)
+        val tail = ((3L * 1024 * 1024 + info.pieceLength - 1) / info.pieceLength).toInt().coerceIn(1, 6)
+        cache.want(info.firstPiece, minOf(info.window, 4), info.lastPiece)
+        cache.want(maxOf(info.firstPiece, info.lastPiece - tail + 1), tail, info.lastPiece)
+        return info
     }
+
+    /** How many video players are reading a torrent that is still downloading. The crawler stands aside for them. */
+    val streaming = java.util.concurrent.atomic.AtomicInteger(0)
 
     fun havePiece(hash: String, piece: Int): Boolean = try { find(hash)?.havePiece(piece) ?: false } catch (t: Throwable) { false }
 
