@@ -3,162 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Release notes | Swarm</title>
-<meta name="description" content="What was added, improved and fixed in each version of the Swarm torrent app for Android, with a link to download the latest version.">
+<title>Swarm release notes</title>
+<meta name="description" content="What changed in each version of Swarm, with the file size and checksum to check your download.">
 <meta name="author" content="Jonathan Jackson">
 <link rel="canonical" href="https://customgpter.github.io/swarm/releases.html">
 <meta name="theme-color" content="#f1f7f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a1211" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Swarm">
-<meta property="og:title" content="Release notes | Swarm">
-<meta property="og:description" content="What was added, improved and fixed in each version of the Swarm torrent app for Android, with a link to download the latest version.">
+<meta property="og:title" content="Swarm release notes">
+<meta property="og:description" content="What changed in each version of Swarm, with the file size and checksum to check your download.">
 <meta property="og:url" content="https://customgpter.github.io/swarm/releases.html">
 <meta property="og:image" content="https://customgpter.github.io/swarm/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Three Swarm screens: the torrent list, search results with seeders and leechers, and the DHT index, beside the Swarm name">
+<meta property="og:image:alt" content="Swarm&#x27;s torrent list with downloads in progress">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="preload" href="assets/fonts/literata-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/literata-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/site.css?v=1">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+<link rel="preload" href="./assets/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/site.css?v=1">
+<link rel="stylesheet" href="./assets/house.css?v=1">
+<link rel="stylesheet" href="./assets/apps-list.css?v=1">
+<script src="./assets/apps-list.js?v=1" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
 <div class="wrap">
-<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="24" fill="#0b8073"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b8073"/></svg><span>Swarm</span></a>
-<nav aria-label="Main"><ul><li><a href="./#features">Features</a></li><li><a href="compare.html">Compare</a></li><li><a href="releases.html" aria-current="page">Releases</a></li><li><a class="more-apps" href="more-apps.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>More apps</a></li><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li><li><a href="licences.html">Licences</a></li></ul></nav>
+<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><defs><linearGradient id="sw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12a594"/><stop offset="1" stop-color="#0b6e63"/></linearGradient></defs><rect width="108" height="108" rx="24" fill="url(#sw-g)"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b6e63"/></svg><span>Swarm</span></a>
+<nav aria-label="Main"><ul><li><a href="./#features">Features</a></li><li><a href="./compare.html">Compare</a></li><li><a href="./releases.html" aria-current="page">Releases</a></li><li><a class="more-apps" href="./more-apps.html"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>More apps</a></li></ul></nav>
+<a class="button small" href="./#download"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>Download</a>
 </div>
 </header>
 <main id="main" class="doc">
 <div class="wrap">
 <div class="measure">
 <h1>Release notes</h1>
-<p class="lede">What was added, improved and fixed in each version of Swarm, newest first. The current version is 1.3.</p>
-<div class="get">
-<a class="button" href="https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk">Download the latest version</a>
-<p class="facts">Version 1.3. Android app file, 61.1 MB. Android 10 or later, 64-bit. Free.</p>
-<p class="facts">Chrome may say the file might be harmful. It shows this for app files that do not come from Google Play. Choose Download anyway. To be sure of the file, see <a href="#checking">Checking your download</a>.</p>
-</div>
-<nav class="contents" aria-label="Versions"><strong>Versions</strong><ul><li><a href="#v1-3">1.3&ensp;Play now, fixed</a></li><li><a href="#v1-2">1.2&ensp;Help, built in</a></li><li><a href="#v1-1">1.1&ensp;A crawler that keeps going</a></li><li><a href="#v1-0">1.0&ensp;First release</a></li></ul></nav>
-
-<article class="release" id="v1-3">
-<p class="ver">Version 1.3</p>
-<h2>Play now, fixed</h2>
-<p class="when"><span class="tag">Latest</span>Released 17 November 2026</p>
-<h3>Fixed</h3>
-<ul>
-<li>Play now could leave the player spinning without ever starting, even with a fifth of the film downloaded. The parts the player needed were being asked for in a way that could make a peer stop answering for a minute at a time. They are now put at the front of the ordinary queue, and the start and the end of the file are asked for the moment you tap Play.</li>
-<li>Tapping Play several times opened a player for every tap. One tap now opens one player, and further taps are ignored while it is opening or on screen.</li>
-<li>The Play button showed no sign of having been pressed. It now changes to Opening straight away.</li>
-<li>The player could take several seconds to appear. It now appears at once, and the slower work happens behind it.</li>
-</ul>
-<h3>Improved</h3>
-<ul>
-<li>While the player is waiting, a line under the spinner says what for: the start of the video, the index at the end of the file, or the next part, with how many people it is connected to and the speed.</li>
-<li>The player keeps asking for the parts just ahead of where you are watching, so it stops to wait less often.</li>
-<li>The DHT crawler now slows right down while anything is downloading and pauses while a video is playing, so it no longer competes with them.</li>
-</ul>
-</article>
-
-<article class="release" id="v1-2">
-<p class="ver">Version 1.2</p>
-<h2>Help, built in</h2>
-<h3>Added</h3>
-<ul>
-<li>A Help page, at the top of Settings and in the side menu. It explains every tab and every setting in plain words, and you can search it.</li>
-<li>Step-by-step guides in Help for getting a torrent into Swarm, adding a website as a search source, and setting up Jackett or Prowlarr with a Torznab address, with example addresses to copy.</li>
-<li>A plain account in Help of what the DHT is, what the crawler does, and what to expect from it.</li>
-<li>A troubleshooting section for the usual problems: a torrent stuck at the start, slow downloads, downloads stopping with the screen off, and files that cannot be found.</li>
-<li>Shortcuts to the right part of Help from Search sources and from the DHT tab.</li>
-</ul>
-<h3>Improved</h3>
-<ul>
-<li>Adding a source now starts on Website, the simpler of the two kinds.</li>
-</ul>
-</article>
-
-<article class="release" id="v1-1">
-<p class="ver">Version 1.1</p>
-<h2>A crawler that keeps going</h2>
-<h3>Fixed</h3>
-<ul>
-<li>The DHT crawler could stop collecting once Swarm had been sent to the background and brought back, while still looking switched on. The index then barely grew.</li>
-<li>The Newest, Seeders and Biggest buttons on the DHT tab did nothing unless you had typed a search.</li>
-<li>After a change of sort order, the Search and DHT lists stayed on the row you were looking at, so the new order was out of sight. They now go back to the top.</li>
-<li>Results from the Internet Archive showed no seeders and a red dot. They are web seeded, and now say so. A tracker that has never heard of a torrent no longer counts as nobody sharing it.</li>
-</ul>
-<h3>Improved</h3>
-<ul>
-<li>The crawler fetches the details of four times as many torrents at once, and asks more of the network for torrents to look at.</li>
-<li>Torrents in the DHT index show the seeders and peers seen when they were found.</li>
-<li>Website sources that list results without download links now work. Swarm shows the list, and gets the link from the result's own page when you tap Download. If that page only shows its link after a tap, Swarm opens it in its browser and picks the link up when you tap it.</li>
-<li>Websites that build their results with scripts, or check for a browser first, are read the way a browser reads them.</li>
-<li>The Test button for a new source says when a site keeps its download links on each result's own page.</li>
-</ul>
-</article>
-
-<article class="release" id="v1-0">
-<p class="ver">Version 1.0</p>
-<h2>First release</h2>
-<h3>Added</h3>
-<ul>
-<li>The Torrents tab, with All, Downloading and Complete lists, pause and resume for one torrent or all of them, a filter, and selection for sharing or deleting several at once.</li>
-<li>Adding a torrent by magnet link, info-hash, the address of a torrent file, or a QR code. Magnet links and torrent files opened in other apps come to Swarm.</li>
-<li>The Search tab: keyword search across your sources, with seeders, leechers, size and age on every result, sorting, and a filter for video, audio, books and software.</li>
-<li>Two built-in sources, the Internet Archive and Linux Tracker, and your own: a Torznab address from Jackett or Prowlarr, or the address of a website's results page.</li>
-<li>The DHT tab: a crawler that builds a searchable index of torrents on your phone, with a choice of when it runs and how large the index may grow.</li>
-<li>A result page with the file list, the source, safety warnings, a copy button, sharing and a QR code.</li>
-<li>A page for each torrent with its progress, speed and pieces, and tabs for files, peers and trackers. Untick files, put one first, set speed limits, re-check the files, or move it up and down the queue.</li>
-<li>Play now, which downloads a video in order so that it can be watched before it has finished.</li>
-<li>Video and Music tabs with built-in players. Music carries on in the background.</li>
-<li>Wi-Fi only, download and upload limits, a limit on active torrents, scheduled hours, only while charging, a battery saver and Auto-Shutdown.</li>
-<li>Seeding to a ratio, not at all, or until you pause it, with uploading kept to Wi-Fi if you choose.</li>
-<li>A warning when no VPN is on, with the option to stop all torrent traffic without one. Encryption, a blocklist of address ranges, and a filter that leaves adult titles out.</li>
-<li>Finished downloads sorted into Movies, TV, Music, Books and Other.</li>
-<li>RSS feeds with filters and automatic downloading, and a watchlist that checks saved searches about once an hour.</li>
-<li>Making a torrent from a file or folder of your own.</li>
-<li>A browser that picks up magnet links and torrent files from the pages you open.</li>
-<li>A backup file holding your torrent list, sources, feeds, watchlist and settings.</li>
-<li>Light and dark themes, or follow the phone.</li>
-<li>A notice on the Torrents tab when a newer version is available.</li>
-</ul>
-</article>
-
-<h2 id="installing">Installing and updating</h2>
-<ul>
-<li>When you download, Chrome may warn that the file might be harmful. It shows this warning for app files that do not come from Google Play. Choose Download anyway.</li>
-<li>Open the downloaded file. The first time, Android asks you to allow your browser or file manager to install apps. Allow it, then tap Install.</li>
-<li>Google Play Protect may say it does not recognise the app, or block it, because Swarm does not come from Google Play. Choose More details, then Install anyway.</li>
-<li>To update, download the latest version and install it over the one you have. Your torrents, index, sources and settings are kept.</li>
-<li>Every version is signed with the same key, so Android accepts an update only if it comes from the same developer.</li>
-</ul>
+<p class="lede">What changed in each version of Swarm. The newest is at the top.</p>
+<section class="release" id="v1.3"><h2><span class="ver">Version 1.3</span> <span class="when">17 November 2026</span><span class="tag">Latest</span></h2><ul><li><b>Play now, fixed.</b> Play now could leave the player spinning without ever starting, even with a fifth of the film downloaded. The parts the player needed were being asked for in a way that could make a peer stop answering for a minute at a time. They are now put at the front of the ordinary queue, and the start and the end of the file are asked for the moment you tap Play.</li><li>Tapping Play several times opened a player for every tap. One tap now opens one player, and further taps are ignored while it is opening or on screen.</li><li>The Play button showed no sign of having been pressed. It now changes to Opening straight away.</li><li>The player could take several seconds to appear. It now appears at once, and the slower work happens behind it.</li><li>While the player is waiting, a line under the spinner says what for: the start of the video, the index at the end of the file, or the next part, with how many people it is connected to and the speed.</li><li>The player keeps asking for the parts just ahead of where you are watching, so it stops to wait less often.</li><li>The DHT crawler now slows right down while anything is downloading and pauses while a video is playing, so it no longer competes with them.</li></ul></section>
+<section class="release" id="v1.2"><h2><span class="ver">Version 1.2</span> <span class="when">17 November 2026</span></h2><ul><li><b>Help, built in.</b> A Help page, at the top of Settings and in the side menu. It explains every tab and every setting in plain words, and you can search it.</li><li>Step-by-step guides in Help for getting a torrent into Swarm, adding a website as a search source, and setting up Jackett or Prowlarr with a Torznab address, with example addresses to copy.</li><li>A plain account in Help of what the DHT is, what the crawler does, and what to expect from it.</li><li>A troubleshooting section for the usual problems: a torrent stuck at the start, slow downloads, downloads stopping with the screen off, and files that cannot be found.</li><li>Shortcuts to the right part of Help from Search sources and from the DHT tab.</li><li>Adding a source now starts on Website, the simpler of the two kinds.</li></ul></section>
+<section class="release" id="v1.1"><h2><span class="ver">Version 1.1</span> <span class="when">17 November 2026</span></h2><ul><li><b>A crawler that keeps going.</b> The DHT crawler could stop collecting once Swarm had been sent to the background and brought back, while still looking switched on. The index then barely grew.</li><li>The Newest, Seeders and Biggest buttons on the DHT tab did nothing unless you had typed a search.</li><li>After a change of sort order, the Search and DHT lists stayed on the row you were looking at, so the new order was out of sight. They now go back to the top.</li><li>Results from the Internet Archive showed no seeders and a red dot. They are web seeded, and now say so. A tracker that has never heard of a torrent no longer counts as nobody sharing it.</li><li>The crawler fetches the details of four times as many torrents at once, and asks more of the network for torrents to look at.</li><li>Torrents in the DHT index show the seeders and peers seen when they were found.</li><li>Website sources that list results without download links now work. Swarm shows the list, and gets the link from the result's own page when you tap Download. If that page only shows its link after a tap, Swarm opens it in its browser and picks the link up when you tap it.</li><li>Websites that build their results with scripts, or check for a browser first, are read the way a browser reads them.</li><li>The Test button for a new source says when a site keeps its download links on each result's own page.</li></ul></section>
+<section class="release" id="v1.0"><h2><span class="ver">Version 1.0</span> <span class="when">17 November 2026</span></h2><ul><li>The Torrents tab, with All, Downloading and Complete lists, pause and resume for one torrent or all of them, a filter, and selection for sharing or deleting several at once.</li><li>Adding a torrent by magnet link, info-hash, the address of a torrent file, or a QR code. Magnet links and torrent files opened in other apps come to Swarm.</li><li>The Search tab: keyword search across your sources, with seeders, leechers, size and age on every result, sorting, and a filter for video, audio, books and software.</li><li>Two built-in sources, the Internet Archive and Linux Tracker, and your own: a Torznab address from Jackett or Prowlarr, or the address of a website's results page.</li><li>The DHT tab: a crawler that builds a searchable index of torrents on your phone, with a choice of when it runs and how large the index may grow.</li><li>A result page with the file list, the source, safety warnings, a copy button, sharing and a QR code.</li><li>A page for each torrent with its progress, speed and pieces, and tabs for files, peers and trackers. Untick files, put one first, set speed limits, re-check the files, or move it up and down the queue.</li><li>Play now, which downloads a video in order so that it can be watched before it has finished.</li><li>Video and Music tabs with built-in players. Music carries on in the background.</li><li>Wi-Fi only, download and upload limits, a limit on active torrents, scheduled hours, only while charging, a battery saver and Auto-Shutdown.</li><li>Seeding to a ratio, not at all, or until you pause it, with uploading kept to Wi-Fi if you choose.</li><li>A warning when no VPN is on, with the option to stop all torrent traffic without one. Encryption, a blocklist of address ranges, and a filter that leaves adult titles out.</li><li>Finished downloads sorted into Movies, TV, Music, Books and Other.</li><li>RSS feeds with filters and automatic downloading, and a watchlist that checks saved searches about once an hour.</li><li>Making a torrent from a file or folder of your own.</li><li>A browser that picks up magnet links and torrent files from the pages you open.</li><li>A backup file holding your torrent list, sources, feeds, watchlist and settings.</li><li>Light and dark themes, or follow the phone.</li><li>A notice on the Torrents tab when a newer version is available.</li></ul></section>
 <h2 id="checking">Checking your download</h2>
-<p>The file for version 1.3 is 61,143,520 bytes. Its SHA-256 checksum is:</p>
-<p class="sum"><code>9bc02494c6ed06c1d6bdd882d14b654d5822700774715f1fce7eb871e2e952ae</code></p>
-<p>Earlier downloads and their files are listed on <a href="https://github.com/CustomGPTer/swarm/releases">GitHub Releases</a>, and the <a href="https://github.com/CustomGPTer/swarm/tree/source">source code</a> is on GitHub. To report a problem with a version, <a href="https://github.com/CustomGPTer/swarm/issues">open an issue on GitHub</a>.</p>
+<p>The file for version 1.3 is called <code>Swarm.apk</code>. It is 61.1 MB (61,143,520 bytes). Its SHA-256 checksum is:</p>
+<p><code class="sum">9bc02494c6ed06c1d6bdd882d14b654d5822700774715f1fce7eb871e2e952ae</code></p>
+<p>On Windows, run <code>certutil -hashfile Swarm.apk SHA256</code> and compare. Every version is signed with the same key, so each one installs over the last and keeps what you have saved.</p>
+<p>Older versions are on the <a href="https://github.com/CustomGPTer/swarm/releases">GitHub releases page</a>.</p>
 </div>
 </div>
 </main>
 <footer class="colophon">
 <div class="wrap">
 <div>
+<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><defs><linearGradient id="sw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12a594"/><stop offset="1" stop-color="#0b6e63"/></linearGradient></defs><rect width="108" height="108" rx="24" fill="url(#sw-g)"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b6e63"/></svg><span>Swarm</span></a>
 <p>&copy; 2026 Jonathan Jackson. Swarm is an independent app.</p>
-<p>This site uses no cookies and no tracking. It is set in Literata and Atkinson Hyperlegible.</p>
+<p>This site uses no cookies and no tracking. The only script on it unlocks the download once the lawful-use box is ticked.</p>
+<p>Set in Bricolage Grotesque and Atkinson Hyperlegible.</p>
 </div>
-<nav aria-label="Footer"><ul>
+<nav aria-label="The app"><h2>The app</h2><ul>
 <li><a href="./">Home</a></li>
-<li><a href="compare.html">Compare</a></li>
-<li><a href="releases.html">Release notes</a></li>
-<li><a href="more-apps.html">More apps</a></li>
-<li><a href="privacy.html">Privacy policy</a></li>
-<li><a href="terms.html">Terms of use</a></li>
-<li><a href="licences.html">Licences</a></li>
-<li><a href="https://github.com/CustomGPTer/swarm/tree/source">Source code</a></li>
+<li><a href="./compare.html">Compare</a></li>
+<li><a href="./releases.html">Release notes</a></li>
+
+</ul></nav>
+<nav aria-label="Legal"><h2>Legal</h2><ul>
+<li><a href="./privacy.html">Privacy policy</a></li>
+<li><a href="./terms.html">Terms of use</a></li>
+<li><a href="./licences.html">Licences</a></li>
+</ul></nav>
+<nav aria-label="More"><h2>More</h2><ul>
+<li><a href="./more-apps.html">More apps</a></li>
+<li><a href="https://customgpter.github.io/">All apps</a></li>
 <li><a href="https://github.com/CustomGPTer/swarm/issues">Contact</a></li>
 </ul></nav>
 </div>

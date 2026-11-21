@@ -3,188 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Swarm: a torrent app for Android with search built in</title>
-<meta name="description" content="Swarm is a free Android torrent app that finds torrents too, with keyword search and its own DHT index. No adverts, no accounts, no tracking and no paid version.">
+<title>Swarm: a free torrent app for Android that finds the torrents too</title>
+<meta name="description" content="Swarm is a free torrent app for Android with search built in: see seeders, size and age, tap Download, and play videos while they download. A DHT index, your own search sources, no adverts and no paid version. Open source.">
 <meta name="author" content="Jonathan Jackson">
 <link rel="canonical" href="https://customgpter.github.io/swarm/">
 <meta name="theme-color" content="#f1f7f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a1211" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Swarm">
-<meta property="og:title" content="Swarm: a torrent app for Android with search built in">
-<meta property="og:description" content="Swarm is a free Android torrent app that finds torrents too, with keyword search and its own DHT index. No adverts, no accounts, no tracking and no paid version.">
+<meta property="og:title" content="Swarm: a free torrent app for Android that finds the torrents too">
+<meta property="og:description" content="Swarm is a free torrent app for Android with search built in: see seeders, size and age, tap Download, and play videos while they download. A DHT index, your own search sources, no adverts and no paid version. Open source.">
 <meta property="og:url" content="https://customgpter.github.io/swarm/">
 <meta property="og:image" content="https://customgpter.github.io/swarm/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Three Swarm screens: the torrent list, search results with seeders and leechers, and the DHT index, beside the Swarm name">
+<meta property="og:image:alt" content="Swarm&#x27;s torrent list with downloads in progress">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="preload" href="assets/fonts/literata-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/literata-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/site.css?v=1">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Swarm","url":"https://customgpter.github.io/swarm/","description":"Swarm is a torrent app for Android that also finds torrents: it searches open catalogues by keyword and builds a searchable index of the DHT on the phone.","applicationCategory":"UtilitiesApplication","applicationSubCategory":"BitTorrent client","operatingSystem":"Android 10 or later","softwareVersion":"1.3","downloadUrl":"https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk","releaseNotes":"https://customgpter.github.io/swarm/releases.html","license":"https://www.gnu.org/licenses/gpl-3.0.html","offers":{"@type":"Offer","price":"0","priceCurrency":"GBP"},"inLanguage":"en-GB","image":"https://customgpter.github.io/swarm/assets/og.png","featureList":["Keyword search across open catalogues and sources you add","Seeders, leechers, size and age on every result","A searchable DHT index built and kept on the phone","Magnet links, torrent files and QR codes","Play video while it downloads","Choose which files in a torrent to download","Wi-Fi only, speed limits, scheduled hours and a battery saver","RSS feeds and a watchlist for saved searches","Built-in video and music players","Light and dark themes","Built-in help written in plain words"],"author":{"@type":"Person","name":"Jonathan Jackson"}}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Swarm","url":"https://customgpter.github.io/swarm/","inLanguage":"en-GB"}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Swarm really free?","acceptedAnswer":{"@type":"Answer","text":"Yes. There is no paid version, no subscription and no adverts, and nothing in the app is locked. It is also open source."}},{"@type":"Question","name":"Is Swarm on Google Play?","acceptedAnswer":{"@type":"Answer","text":"No. Swarm is a personal project and is downloaded from this site as an Android app file. It needs Android 10 or later on a 64-bit phone, which covers almost every phone sold in recent years."}},{"@type":"Question","name":"What is a torrent?","acceptedAnswer":{"@type":"Answer","text":"A torrent is a file, or a set of files, shared among the people downloading it. Each of them fetches pieces from the others and passes pieces on, so there is no single server to slow down or go offline. A magnet link is a short address for a torrent."}},{"@type":"Question","name":"Where does the search look?","acceptedAnswer":{"@type":"Answer","text":"In the sources you have switched on. Two are built in: the Internet Archive, for public-domain and freely licensed films, music, books and software, and Linux Tracker, for Linux and other open-source system downloads. You can add your own: a Torznab address from Jackett or Prowlarr, or the address of a website's search results page."}},{"@type":"Question","name":"What is the DHT tab?","acceptedAnswer":{"@type":"Answer","text":"The DHT is the network torrent apps use to find each other without a central server. It has no search of its own. Swarm listens to it, collects the names and file lists of the torrents it hears about, and keeps them in an index on your phone that you can search. The index starts empty and grows while Swarm is open and, unless you change it, while the phone is charging on Wi-Fi."}},{"@type":"Question","name":"Am I allowed to download a torrent?","acceptedAnswer":{"@type":"Answer","text":"That depends on what is in it. Download and share only what you have the right to: work in the public domain, work its owner offers freely or under an open licence, or your own. The DHT index and any source you add can list material that is not free to share, and Swarm cannot tell which is which. That judgement is yours."}},{"@type":"Question","name":"Can other people see what I download?","acceptedAnswer":{"@type":"Answer","text":"Other people sharing the same torrent can see your internet address. That is how BitTorrent works, in every torrent app. Swarm warns you when no VPN is on, and can be set to stop all torrent traffic without one. Its encryption setting hides torrent traffic from simple network filters, but it does not hide your address."}},{"@type":"Question","name":"Does Swarm upload as well as download?","acceptedAnswer":{"@type":"Answer","text":"Yes. While a torrent downloads, the pieces you already have are passed on to others. After it finishes, Swarm carries on until it has given back as much as it took, on Wi-Fi only, then stops. You can set it to stop the moment a download finishes, or to keep going until you pause it."}},{"@type":"Question","name":"Will it use my mobile data?","acceptedAnswer":{"@type":"Answer","text":"Not unless you let it. Wi-Fi only is switched on when you install Swarm, so nothing is downloaded or uploaded on mobile data until you turn that off."}},{"@type":"Question","name":"Where do the files go?","acceptedAnswer":{"@type":"Answer","text":"Into a Swarm folder inside your phone's Download folder. When a download finishes it is sorted into Movies, TV, Music, Books or Other. This needs the file access Swarm asks for when you first open it. Without it, downloads are kept in the app's own folder."}},{"@type":"Question","name":"Why is the download so large?","acceptedAnswer":{"@type":"Answer","text":"The file is about 61 MB because Swarm carries its whole torrent engine with it, along with decoders for the sound formats that phones do not play by themselves."}},{"@type":"Question","name":"How do I update Swarm?","acceptedAnswer":{"@type":"Answer","text":"Swarm tells you on the Torrents tab when a newer version is on this site. Download it and install it over the one you have. Your torrents, index, sources and settings are kept."}}]}</script>
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+<link rel="preload" href="./assets/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/site.css?v=1">
+<link rel="stylesheet" href="./assets/house.css?v=1">
+<link rel="stylesheet" href="./assets/apps-list.css?v=1">
+<script src="./assets/apps-list.js?v=1" defer></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Swarm","url":"https://customgpter.github.io/swarm/","description":"Swarm is a free torrent app for Android with search built in: see seeders, size and age, tap Download, and play videos while they download. A DHT index, your own search sources, no adverts and no paid version. Open source.","applicationCategory":"UtilitiesApplication","operatingSystem":"Android 10 or later, 64-bit","softwareVersion":"1.3","downloadUrl":"https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk","releaseNotes":"https://customgpter.github.io/swarm/releases.html","offers":{"@type":"Offer","price":"0","priceCurrency":"GBP"},"inLanguage":"en-GB","image":"https://customgpter.github.io/swarm/assets/og.png","featureList":["Search built in","The DHT tab","Magnets, files and QR codes","A full torrent client","Wi-Fi only if you like","Keeps going","Video and music tabs","Play while downloading"],"author":{"@type":"Person","name":"Jonathan Jackson"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Swarm really free?","acceptedAnswer":{"@type":"Answer","text":"Yes. There is no paid version, no subscription and no adverts, and nothing in the app is locked. It is also open source. See the comparison."}},{"@type":"Question","name":"Is Swarm on Google Play?","acceptedAnswer":{"@type":"Answer","text":"No. Swarm is a personal project and is downloaded from this site as an Android app file. It needs Android 10 or later on a 64-bit phone, which covers almost every phone sold in recent years."}},{"@type":"Question","name":"What is a torrent?","acceptedAnswer":{"@type":"Answer","text":"A torrent is a file, or a set of files, shared among the people downloading it. Each of them fetches pieces from the others and passes pieces on, so there is no single server to slow down or go offline. A magnet link is a short address for a torrent."}},{"@type":"Question","name":"Where does the search look?","acceptedAnswer":{"@type":"Answer","text":"In the sources you have switched on. Two are built in: the Internet Archive, for public-domain and freely licensed films, music, books and software, and Linux Tracker, for Linux and other open-source system downloads. You can add your own: a Torznab address from Jackett or Prowlarr, or the address of a website&#x27;s search results page."}},{"@type":"Question","name":"What is the DHT tab?","acceptedAnswer":{"@type":"Answer","text":"The DHT is the network torrent apps use to find each other without a central server. It has no search of its own. Swarm listens to it, collects the names and file lists of the torrents it hears about, and keeps them in an index on your phone that you can search. The index starts empty and grows while Swarm is open and, unless you change it, while the phone is charging on Wi-Fi."}},{"@type":"Question","name":"Am I allowed to download a torrent?","acceptedAnswer":{"@type":"Answer","text":"That depends on what is in it. Download and share only what you have the right to: work in the public domain, work its owner offers freely or under an open licence, or your own. The DHT index and any source you add can list material that is not free to share, and Swarm cannot tell which is which. That judgement is yours. The detail is in the terms."}},{"@type":"Question","name":"Can other people see what I download?","acceptedAnswer":{"@type":"Answer","text":"Other people sharing the same torrent can see your internet address. That is how BitTorrent works, in every torrent app. Swarm warns you when no VPN is on, and can be set to stop all torrent traffic without one. Its encryption setting hides torrent traffic from simple network filters, but it does not hide your address."}},{"@type":"Question","name":"Does Swarm upload as well as download?","acceptedAnswer":{"@type":"Answer","text":"Yes. While a torrent downloads, the pieces you already have are passed on to others. After it finishes, Swarm carries on until it has given back as much as it took, on Wi-Fi only, then stops. You can set it to stop the moment a download finishes, or to keep going until you pause it."}},{"@type":"Question","name":"Will it use my mobile data?","acceptedAnswer":{"@type":"Answer","text":"Not unless you let it. Wi-Fi only is switched on when you install Swarm, so nothing is downloaded or uploaded on mobile data until you turn that off."}},{"@type":"Question","name":"Where do the files go?","acceptedAnswer":{"@type":"Answer","text":"Into a Swarm folder inside your phone&#x27;s Download folder. When a download finishes it is sorted into Movies, TV, Music, Books or Other. This needs the file access Swarm asks for when you first open it. Without it, downloads are kept in the app&#x27;s own folder."}},{"@type":"Question","name":"Why is the download so large?","acceptedAnswer":{"@type":"Answer","text":"The file is about 61 MB because Swarm carries its whole torrent engine with it, along with decoders for the sound formats that phones do not play by themselves."}},{"@type":"Question","name":"How do I update Swarm?","acceptedAnswer":{"@type":"Answer","text":"Swarm tells you on the Torrents tab when a newer version is on this site. Download it and install it over the one you have. Your torrents, index, sources and settings are kept."}}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
 <div class="wrap">
-<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><rect width="108" height="108" rx="24" fill="#0b8073"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b8073"/></svg><span>Swarm</span></a>
-<nav aria-label="Main"><ul><li><a href="./#features">Features</a></li><li><a href="compare.html">Compare</a></li><li><a href="releases.html">Releases</a></li><li><a class="more-apps" href="more-apps.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>More apps</a></li><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li><li><a href="licences.html">Licences</a></li></ul></nav>
+<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><defs><linearGradient id="sw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12a594"/><stop offset="1" stop-color="#0b6e63"/></linearGradient></defs><rect width="108" height="108" rx="24" fill="url(#sw-g)"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b6e63"/></svg><span>Swarm</span></a>
+<nav aria-label="Main"><ul><li><a href="./#features">Features</a></li><li><a href="./compare.html">Compare</a></li><li><a href="./releases.html">Releases</a></li><li><a class="more-apps" href="./more-apps.html"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>More apps</a></li></ul></nav>
+<a class="button small" href="./#download"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>Download</a>
 </div>
 </header>
 <main id="main">
 <div class="hero">
 <div class="wrap hero-grid">
 <div class="hero-copy">
-<h1>A torrent app that finds the torrents too</h1>
-<p class="lede">Swarm is a torrent app for Android with search built in. Type a few words, see how many people are sharing each result, how big it is and how old, and tap Download. It goes straight into your list.</p>
-<p class="lede">It is free, with no paid version and no adverts. Light by default, with a dark theme in Settings.</p>
-<p class="get"><a class="button" href="https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk">Download for Android</a></p>
-<p class="facts">Free, with nothing to unlock. Android 10 or later. No ads, no accounts, no tracking. <a href="compare.html">Compare</a> &middot; <a href="releases.html">Release notes</a></p>
+<h1>A torrent app that finds the torrents too.</h1>
+<p class="lede">Swarm is a torrent app for Android with search built in. Type a few words, see how many people are sharing each result, how big it is and how old, and tap Download. It goes straight into your list.</p><p class="lede">It is free, with no paid version and no adverts. The code for this version is public.</p>
+
+<div class="gate-scope"><div class="law-box" data-gate><label><input type="checkbox"> I understand and will use this app within the law</label><p>Swarm can fetch things other people own. <a href="terms.html#law">What the law says</a></p><noscript><p>Turn on JavaScript to tick the box and download.</p></noscript></div><p class="get" id="download"><a class="button" data-href="https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk" aria-disabled="true" role="link" tabindex="-1"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>Download for Android</a><a class="aside" href="#install">How to install</a></p></div>
+<ul class="pills"><li>Version 1.3</li><li>Android 10 or later, 64-bit</li><li>61 MB</li></ul>
+<p class="facts">Free, with nothing to unlock. No adverts, no account with the developer, no tracking. <a href="compare.html">Compare</a> or read the <a href="releases.html">release notes</a>.</p>
 <p class="facts">Chrome may say the file might be harmful. It shows this for app files that do not come from Google Play. Choose Download anyway.</p>
 </div>
-<div class="phones" role="img" aria-label="Two Swarm screens. On the left, the Torrents tab with six torrents: two downloading with their progress, speed and time left, one seeding, one paused, one complete and one queued. On the right, search results for the word linux, each with its seeders, leechers, size, age and the source it came from.">
-<img src="assets/hero-a.webp" alt="" width="540" height="960"><img src="assets/hero-b.webp" alt="" width="540" height="960">
+<div class="hero-phone"><div class="phone"><img src="./assets/screens/torrents.png" alt="Your torrents: downloading, seeding, paused and complete." width="393" height="852" fetchpriority="high"></div></div>
 </div>
 </div>
+
+<section class="promises" aria-label="In short">
+<div class="wrap"><ul><li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.6 12.4l2.3 2.3 4.5-4.9"/></svg><span><b>No subscription</b><span>No paid version and nothing to unlock.</span></span></li><li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.6 12.4l2.3 2.3 4.5-4.9"/></svg><span><b>No adverts</b><span>None in the app and none on this site.</span></span></li><li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.6 12.4l2.3 2.3 4.5-4.9"/></svg><span><b>Search built in</b><span>Seeders, size and age before you tap.</span></span></li><li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.6 12.4l2.3 2.3 4.5-4.9"/></svg><span><b>Open source</b><span>The code for this version is public.</span></span></li></ul></div>
+</section>
+
+<section id="screens" aria-labelledby="screens-h">
+<div class="wrap">
+<h2 id="screens-h">A look inside</h2>
+<p class="intro">These are the real screens, drawn from the app&#x27;s own code with freely shared films, books and Linux downloads. Swipe or scroll sideways to see them all.</p>
+<div class="gallery" tabindex="0" role="region" aria-label="Screens from Swarm"><figure class="shot"><div class="phone"><img src="./assets/screens/torrents.png" alt="Your torrents: downloading, seeding, paused and complete." width="393" height="852" loading="eager" decoding="async"></div><figcaption>Your torrents: downloading, seeding, paused and complete.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/search.png" alt="Search: seeders, leechers, size and age for every result." width="393" height="852" loading="eager" decoding="async"></div><figcaption>Search: seeders, leechers, size and age for every result.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/result.png" alt="One result&#x27;s details before you download it." width="393" height="852" loading="eager" decoding="async"></div><figcaption>One result&#x27;s details before you download it.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/detail.png" alt="A torrent in progress: speed, peers, files and trackers." width="393" height="852" loading="eager" decoding="async"></div><figcaption>A torrent in progress: speed, peers, files and trackers.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/dht.png" alt="The DHT tab: an index Swarm builds on your phone over time." width="393" height="852" loading="eager" decoding="async"></div><figcaption>The DHT tab: an index Swarm builds on your phone over time.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/sources.png" alt="Search sources: the two built in, and your own." width="393" height="852" loading="eager" decoding="async"></div><figcaption>Search sources: the two built in, and your own.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/help.png" alt="Help written in plain words." width="393" height="852" loading="eager" decoding="async"></div><figcaption>Help written in plain words.</figcaption></figure><figure class="shot"><div class="phone"><img src="./assets/screens/settings.png" alt="Settings: theme, bandwidth limits and where files go." width="393" height="852" loading="eager" decoding="async"></div><figcaption>Settings: theme, bandwidth limits and where files go.</figcaption></figure></div>
 </div>
+</section>
 
 <section id="how" aria-labelledby="how-h">
 <div class="wrap">
 <h2 id="how-h">How it works</h2>
-<p class="intro">Most torrent apps wait for you to bring them a link from somewhere else. Swarm can do that, and it can also go and look.</p>
-<ol class="steps">
-<li><h3>Find it</h3><p>Search by keyword on the Search tab, or look through the index on the DHT tab. Or bring your own: paste a magnet link, open a torrent file, or scan a QR code.</p></li>
-<li><h3>Check it</h3><p>Every result shows its numbers, such as <span class="path">&#9650; 2143 &#9660; 87 &middot; 5.9 G &middot; 26 d ago</span>. Tap one for its file list, where it came from, and any warning.</p></li>
-<li><h3>Download it</h3><p>Tap Download and it starts at once on the Torrents tab. Watch a video while the rest arrives, or leave it to finish in the background.</p></li>
-</ol>
+<p class="intro">A torrent is a file shared by many people at once, each sending a piece. Swarm finds them, fetches the pieces and puts the file together.</p>
+<ol class="steps"><li><h3>Search</h3><p>Type a few words. Swarm asks its sources and shows seeders, size and age for each result.</p></li><li><h3>Download</h3><p>Tap Download. The file goes into your list and is sorted into Movies, Music, Books or Download when it is done.</p></li><li><h3>Watch or listen</h3><p>Play a video while it is still downloading, or open it from the Video and Music tabs.</p></li></ol>
 </div>
 </section>
 
 <section id="features" aria-labelledby="features-h">
 <div class="wrap">
-<h2 id="features-h">Everything a torrent app should do, and the looking</h2>
-<p class="intro">Five tabs: Torrents, Search, DHT, Video and Music. The rest is in the side menu.</p>
-<dl class="features">
-<div><dt>Search with the numbers that matter</dt><dd>Seeders, leechers, size and age on every result, checked live against the trackers. Sort by any of them, or narrow to video, audio, books or software.</dd></div>
-<div><dt>A DHT index of your own</dt><dd>Swarm listens to the network torrent apps share, notes the torrents it hears about, and keeps a searchable index on your phone. Nobody else holds it.</dd></div>
-<div><dt>Sources you choose</dt><dd>The Internet Archive and Linux Tracker are built in. Add a Torznab address from Jackett or Prowlarr, or the address of any website's results page, and Swarm reads that too.</dd></div>
-<div><dt>Play while it downloads</dt><dd>Play now fetches a video from the start so you can watch before it has finished. The Video and Music tabs play what you already have, with music carrying on in the background.</dd></div>
-<div><dt>Only the files you want</dt><dd>Untick the files you do not need, put one at the front of the queue, and set speed limits for a single torrent.</dd></div>
-<div><dt>Kind to your data and battery</dt><dd>Wi-Fi only from the start. Speed limits, scheduled hours, only while charging, a battery saver, and an option to close when everything has finished.</dd></div>
-<div><dt>Seeding on your terms</dt><dd>Give back as much as you took, a different ratio, nothing, or keep going. Uploading can be kept to Wi-Fi.</dd></div>
-<div><dt>Safety checks</dt><dd>A warning when a file is a program dressed up as a video, when a video is too small to be real, or when a torrent has nobody sharing it. Swarm will not open program files.</dd></div>
-<div><dt>Feeds and a watchlist</dt><dd>Follow RSS feeds, with filters, and download matches by themselves. Watch a search, and Swarm tells you when something new turns up.</dd></div>
-<div><dt>The rest of the toolbox</dt><dd>Make a torrent from your own files, share one as a QR code, block address ranges with a blocklist, and keep everything in one backup file.</dd></div>
-<div><dt>Help that explains itself</dt><dd>A Help page inside the app covers every tab and setting in plain words, with step-by-step guides for adding a website, setting up Jackett, and what the DHT is.</dd></div>
-</dl>
-</div>
-</section>
-
-<section id="screens" aria-labelledby="screens-h">
-<div class="wrap">
-<h2 id="screens-h">What it looks like</h2>
-<p class="intro">Light by default, with a dark theme and one that follows the phone.</p>
-<div class="gallery">
-<figure><img src="assets/s-result.webp" alt="Swarm screen: Seeders, leechers, size and age before you download" width="540" height="1170" loading="lazy"><figcaption>Seeders, leechers, size and age before you download</figcaption></figure>
-<figure><img src="assets/s-detail.webp" alt="Swarm screen: Progress, speed and the swarm for each torrent" width="540" height="1170" loading="lazy"><figcaption>Progress, speed and the swarm for each torrent</figcaption></figure>
-<figure><img src="assets/s-dht.webp" alt="Swarm screen: An index of the DHT, kept on your phone" width="540" height="1170" loading="lazy"><figcaption>An index of the DHT, kept on your phone</figcaption></figure>
-<figure><img src="assets/s-sources.webp" alt="Swarm screen: Open catalogues, plus sources you add" width="540" height="1170" loading="lazy"><figcaption>Open catalogues, plus sources you add</figcaption></figure>
-<figure><img src="assets/s-settings.webp" alt="Swarm screen: Wi-Fi only, limits and folders" width="540" height="1170" loading="lazy"><figcaption>Wi-Fi only, limits and folders</figcaption></figure>
-<figure><img src="assets/s-torrents-dark.webp" alt="Swarm screen: The dark theme" width="540" height="1170" loading="lazy"><figcaption>The dark theme</figcaption></figure>
-<figure><img src="assets/s-search-dark.webp" alt="Swarm screen: Search results in the dark theme" width="540" height="1170" loading="lazy"><figcaption>Search results in the dark theme</figcaption></figure>
-<figure><img src="assets/s-help.webp" alt="Swarm screen: Help in plain words, built in" width="540" height="1170" loading="lazy"><figcaption>Help in plain words, built in</figcaption></figure>
-</div>
-</div>
-</section>
-
-<section id="permissions" aria-labelledby="permissions-h">
-<div class="wrap">
-<h2 id="permissions-h">What it asks of your phone</h2>
-<p class="intro">Swarm has no access to your contacts, location or microphone, and uses what it does have only for what is listed here.</p>
-<div class="scroll">
-<table>
-<thead><tr><th scope="col">Access</th><th scope="col">What Swarm does with it</th><th scope="col">What it never does</th></tr></thead>
-<tbody>
-<tr><th scope="row">Internet access</th><td>Connects to other people sharing a torrent, to trackers and to the DHT. Sends your search words to the sources you have switched on. Checks GitHub for a newer version.</td><td>Send anything to the developer. Swarm has no servers of its own.</td></tr>
-<tr><th scope="row">Wi-Fi and network state</th><td>Tells Wi-Fi from mobile data, notices a VPN, and finds other torrent apps on your own Wi-Fi network.</td><td>Read the names of networks you have used, or work out where you are.</td></tr>
-<tr><th scope="row">All files access</th><td>Saves downloads into Download/Swarm and sorts finished ones into folders. Reads a file or folder you pick when you make a torrent of your own.</td><td>Read, copy or upload any other file. Only the torrents you add are shared.</td></tr>
-<tr><th scope="row">Videos and music</th><td>Lists the video and audio files on your phone in the Video and Music tabs.</td><td>Send the list anywhere.</td></tr>
-<tr><th scope="row">Notifications</th><td>Shows how downloads are going, tells you when one is ready or a watched search has something new, and holds the music controls.</td><td>Send adverts, offers or reminders.</td></tr>
-<tr><th scope="row">Running in the background</th><td>Keeps torrents going when you switch apps or turn the screen off, and runs the DHT crawler while the phone charges on Wi-Fi.</td><td>Download or upload torrents on mobile data while Wi-Fi only is on.</td></tr>
-<tr><th scope="row">Camera</th><td>Scans a QR code that holds a magnet link, when you tap Scan QR.</td><td>Take or keep pictures.</td></tr>
-</tbody>
-</table>
-</div>
-<p class="after-table">The detail is in the <a href="privacy.html">privacy policy</a>.</p>
+<h2 id="features-h">Everything is in, and all of it is free</h2>
+<p class="intro">Nothing below is held back for a paid tier, because there is no paid tier.</p>
+<div class="groups"><div class="group"><h3>Finding</h3><dl><div><dt>Search built in</dt><dd>The Internet Archive and Linux Tracker out of the box, with your own Torznab or Jackett sources if you add them.</dd></div><div><dt>The DHT tab</dt><dd>Swarm quietly learns which torrents exist on the DHT network and builds a searchable index on your phone.</dd></div><div><dt>Magnets, files and QR codes</dt><dd>Open a magnet link or a .torrent file from anywhere, or scan one.</dd></div></dl></div><div class="group"><h3>Downloading</h3><dl><div><dt>A full torrent client</dt><dd>Choose files, set the order, pause and resume, limit speed and connections, seed to a ratio.</dd></div><div><dt>Wi-Fi only if you like</dt><dd>Nothing downloaded or uploaded on mobile data unless you say so.</dd></div><div><dt>Keeps going</dt><dd>Downloads carry on in the background, with a home-screen widget.</dd></div></dl></div><div class="group"><h3>Playing</h3><dl><div><dt>Video and music tabs</dt><dd>What you downloaded, with thumbnails and a New badge.</dd></div><div><dt>Play while downloading</dt><dd>A built-in player with subtitles, audio-track choice, speed and picture-in-picture.</dd></div></dl></div></div>
 </div>
 </section>
 
 <section id="privacy" aria-labelledby="privacy-h">
 <div class="wrap">
-<h2 id="privacy-h">Nobody in the middle</h2>
-<ul class="plain">
-<li><h3>No servers</h3><p>Swarm has no accounts and no servers of its own. The developer never learns what you search for, download or share.</p></li>
-<li><h3>No ads, no tracking</h3><p>There is no advertising, no analytics and no tracking in the app or on this site.</p></li>
-<li><h3>Straight talk about torrents</h3><p>Other people sharing a torrent can see your internet address. Swarm says so when you first open it, and warns you when no VPN is on.</p></li>
-</ul>
+<h2 id="privacy-h">No account, no tracking</h2>
+<ul class="plain"><li><h3>No servers of its own</h3><p>Swarm has no accounts and no servers. The developer receives nothing from the app.</p></li><li><h3>Torrents are public</h3><p>Other people in a torrent can see your IP address. Use a VPN if that matters to you.</p></li><li><h3>No ads, no tracking</h3><p>There is no advertising, analytics or tracking, in the app or on this site.</p></li></ul>
 </div>
 </section>
 
-<section id="free" aria-labelledby="free-h">
+<section id="law" aria-labelledby="law-h" class="law-band">
 <div class="wrap">
-<h2 id="free-h">Free, including what others charge for</h2>
-<p class="intro">Swarm has no paid version and carries no adverts. Going by their own Google Play listings, two of the best-known Android torrent apps show adverts, and one keeps a feature for its paid edition.</p>
-<dl class="features">
-<div><dt>No adverts</dt><dd>BitTorrent and Flud both carry adverts, and both have in-app purchases.</dd></div>
-<div><dt>Closing when downloads finish</dt><dd>Marked as a Pro feature by BitTorrent.</dd></div>
-<div><dt>Search and a DHT index</dt><dd>Not listed by BitTorrent or by Flud.</dd></div>
-<div><dt>Open source</dt><dd>Swarm's source code is public, so anyone can check what it does.</dd></div>
-</dl>
-<p class="more"><a href="compare.html">See the full comparison, with sources</a></p>
+<h2 id="law-h">Use it within the law</h2>
+<p class="intro">Torrents are a fair way to share free software, public-domain films and books, and anything offered under an open licence. Sharing other people's films, music, games or books without permission is not. Download only what you have the right to, and remember that a torrent uploads to others while it downloads.</p>
+<ul class="ticks"><li><b>Copyright, Designs and Patents Act 1988.</b> Copying or sharing a film, recording, game or book without the owner's permission can infringe copyright. Making copies available to the public can be a criminal offence.</li><li><b>Digital Economy Act 2017.</b> Raised the maximum penalty for online copyright infringement to ten years in prison.</li><li><b>Computer Misuse Act 1990.</b> Files from unknown sources can carry harmful software. Never run programs you do not trust.</li><li><b>Your internet provider's terms.</b> Providers can warn or cut off customers who share copyrighted material.</li></ul>
+<p class="after-table">Laws differ in other countries. If you are not in the UK, the rules where you are apply. Read the <a href="terms.html#law">terms of use</a>.</p>
+</div>
+</section>
+<section id="install" aria-labelledby="install-h">
+<div class="wrap">
+<h2 id="install-h">Installing and updating</h2>
+<p class="intro">Swarm is not on Google Play, so your phone asks a couple of extra questions the first time.</p>
+<ol class="steps"><li><h3>Download the app file</h3><p>Tap Download on your phone. The file is called Swarm.apk and is about 61 MB. If Chrome says the file might be harmful, choose Download anyway. First tick the box to say you will use the app within the law.</p></li><li><h3>Allow the install</h3><p>Open the file. The first time, Android asks you to allow your browser to install apps. Allow it, go back and tap Install. If Google Play Protect steps in, choose More details, then Install anyway.</p></li><li><h3>Updating later</h3><p>Swarm tells you when a newer version is out. Install the new file over the old one and everything you have saved is kept.</p></li></ol>
+<p class="after-table">Version 1.3, released 17 November 2026. See the <a href="releases.html">release notes</a>, or <a href="releases.html#checking">check your download</a>.</p>
 </div>
 </section>
 
 <section id="questions" aria-labelledby="questions-h">
 <div class="wrap">
 <h2 id="questions-h">Questions</h2>
-<div class="faq">
-<div><h3>Is Swarm really free?</h3><p>Yes. There is no paid version, no subscription and no adverts, and nothing in the app is locked. It is also open source. <a href="compare.html">See the comparison</a>.</p></div><div><h3>Is Swarm on Google Play?</h3><p>No. Swarm is a personal project and is downloaded from this site as an Android app file. It needs Android 10 or later on a 64-bit phone, which covers almost every phone sold in recent years.</p></div><div><h3>What is a torrent?</h3><p>A torrent is a file, or a set of files, shared among the people downloading it. Each of them fetches pieces from the others and passes pieces on, so there is no single server to slow down or go offline. A magnet link is a short address for a torrent.</p></div><div><h3>Where does the search look?</h3><p>In the sources you have switched on. Two are built in: the Internet Archive, for public-domain and freely licensed films, music, books and software, and Linux Tracker, for Linux and other open-source system downloads. You can add your own: a Torznab address from Jackett or Prowlarr, or the address of a website&#x27;s search results page.</p></div><div><h3>What is the DHT tab?</h3><p>The DHT is the network torrent apps use to find each other without a central server. It has no search of its own. Swarm listens to it, collects the names and file lists of the torrents it hears about, and keeps them in an index on your phone that you can search. The index starts empty and grows while Swarm is open and, unless you change it, while the phone is charging on Wi-Fi.</p></div><div><h3>Am I allowed to download a torrent?</h3><p>That depends on what is in it. Download and share only what you have the right to: work in the public domain, work its owner offers freely or under an open licence, or your own. The DHT index and any source you add can list material that is not free to share, and Swarm cannot tell which is which. That judgement is yours. The detail is in the <a href="terms.html#downloads">terms</a>.</p></div><div><h3>Can other people see what I download?</h3><p>Other people sharing the same torrent can see your internet address. That is how BitTorrent works, in every torrent app. Swarm warns you when no VPN is on, and can be set to stop all torrent traffic without one. Its encryption setting hides torrent traffic from simple network filters, but it does not hide your address.</p></div><div><h3>Does Swarm upload as well as download?</h3><p>Yes. While a torrent downloads, the pieces you already have are passed on to others. After it finishes, Swarm carries on until it has given back as much as it took, on Wi-Fi only, then stops. You can set it to stop the moment a download finishes, or to keep going until you pause it.</p></div><div><h3>Will it use my mobile data?</h3><p>Not unless you let it. Wi-Fi only is switched on when you install Swarm, so nothing is downloaded or uploaded on mobile data until you turn that off.</p></div><div><h3>Where do the files go?</h3><p>Into a Swarm folder inside your phone&#x27;s Download folder. When a download finishes it is sorted into Movies, TV, Music, Books or Other. This needs the file access Swarm asks for when you first open it. Without it, downloads are kept in the app&#x27;s own folder.</p></div><div><h3>Why is the download so large?</h3><p>The file is about 61 MB because Swarm carries its whole torrent engine with it, along with decoders for the sound formats that phones do not play by themselves.</p></div><div><h3>How do I update Swarm?</h3><p>Swarm tells you on the Torrents tab when a newer version is on this site. Download it and install it over the one you have. Your torrents, index, sources and settings are kept.</p></div>
-</div>
+<div class="faq"><details><summary>Is Swarm really free?</summary><p>Yes. There is no paid version, no subscription and no adverts, and nothing in the app is locked. It is also open source. <a href="compare.html">See the comparison</a>.</p></details><details><summary>Is Swarm on Google Play?</summary><p>No. Swarm is a personal project and is downloaded from this site as an Android app file. It needs Android 10 or later on a 64-bit phone, which covers almost every phone sold in recent years.</p></details><details><summary>What is a torrent?</summary><p>A torrent is a file, or a set of files, shared among the people downloading it. Each of them fetches pieces from the others and passes pieces on, so there is no single server to slow down or go offline. A magnet link is a short address for a torrent.</p></details><details><summary>Where does the search look?</summary><p>In the sources you have switched on. Two are built in: the Internet Archive, for public-domain and freely licensed films, music, books and software, and Linux Tracker, for Linux and other open-source system downloads. You can add your own: a Torznab address from Jackett or Prowlarr, or the address of a website&#x27;s search results page.</p></details><details><summary>What is the DHT tab?</summary><p>The DHT is the network torrent apps use to find each other without a central server. It has no search of its own. Swarm listens to it, collects the names and file lists of the torrents it hears about, and keeps them in an index on your phone that you can search. The index starts empty and grows while Swarm is open and, unless you change it, while the phone is charging on Wi-Fi.</p></details><details><summary>Am I allowed to download a torrent?</summary><p>That depends on what is in it. Download and share only what you have the right to: work in the public domain, work its owner offers freely or under an open licence, or your own. The DHT index and any source you add can list material that is not free to share, and Swarm cannot tell which is which. That judgement is yours. The detail is in the <a href="terms.html#downloads">terms</a>.</p></details><details><summary>Can other people see what I download?</summary><p>Other people sharing the same torrent can see your internet address. That is how BitTorrent works, in every torrent app. Swarm warns you when no VPN is on, and can be set to stop all torrent traffic without one. Its encryption setting hides torrent traffic from simple network filters, but it does not hide your address.</p></details><details><summary>Does Swarm upload as well as download?</summary><p>Yes. While a torrent downloads, the pieces you already have are passed on to others. After it finishes, Swarm carries on until it has given back as much as it took, on Wi-Fi only, then stops. You can set it to stop the moment a download finishes, or to keep going until you pause it.</p></details><details><summary>Will it use my mobile data?</summary><p>Not unless you let it. Wi-Fi only is switched on when you install Swarm, so nothing is downloaded or uploaded on mobile data until you turn that off.</p></details><details><summary>Where do the files go?</summary><p>Into a Swarm folder inside your phone&#x27;s Download folder. When a download finishes it is sorted into Movies, TV, Music, Books or Other. This needs the file access Swarm asks for when you first open it. Without it, downloads are kept in the app&#x27;s own folder.</p></details><details><summary>Why is the download so large?</summary><p>The file is about 61 MB because Swarm carries its whole torrent engine with it, along with decoders for the sound formats that phones do not play by themselves.</p></details><details><summary>How do I update Swarm?</summary><p>Swarm tells you on the Torrents tab when a newer version is on this site. Download it and install it over the one you have. Your torrents, index, sources and settings are kept.</p></details></div>
 </div>
 </section>
 
-<section id="get" aria-labelledby="get-h">
-<div class="wrap"><div class="measure">
-<h2 id="get-h">Getting Swarm</h2>
-<p>Swarm is a personal project and is free, with no paid version. It is downloaded from this site as an Android app file and is not on Google Play. It runs on 64-bit phones and tablets with Android 10 or later.</p>
-<p class="get"><a class="button" href="https://github.com/CustomGPTer/swarm/releases/latest/download/Swarm.apk">Download for Android</a></p>
-<p>When you download, Chrome may warn that the file might be harmful. It shows this warning for app files that do not come from Google Play; choose Download anyway. If you want to be sure the file is the real one, compare it with the checksum in the <a href="releases.html#checking">release notes</a>.</p>
-<p>Open the downloaded file to install it. The first time, Android asks you to allow your browser to install apps. Google Play Protect may also step in, because Swarm is an app it has not seen before: choose More details, then Install anyway. To update, install the latest version over the one you have: your torrents and settings are kept. What changed in each version is in the <a href="releases.html">release notes</a>.</p>
-<p>Swarm is open source, and its <a href="https://github.com/CustomGPTer/swarm/tree/source">source code is on GitHub</a>. For a question, a problem, or anything about your data, <a href="https://github.com/CustomGPTer/swarm/issues">open an issue on GitHub</a>.</p>
-</div></div>
+<section class="closing" aria-labelledby="closing-h">
+<div class="wrap">
+<div><h2 id="closing-h">Find it, fetch it, play it</h2><p>Free, with no adverts and nothing to unlock. Made by the developer of several other free Android apps: <a href="more-apps.html">see them all</a>.</p></div>
+<a class="button" href="./#download"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>Download for Android</a>
+</div>
 </section>
 </main>
 <footer class="colophon">
 <div class="wrap">
 <div>
+<a class="brand" href="./" aria-label="Swarm home"><svg viewBox="0 0 108 108" aria-hidden="true"><defs><linearGradient id="sw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12a594"/><stop offset="1" stop-color="#0b6e63"/></linearGradient></defs><rect width="108" height="108" rx="24" fill="url(#sw-g)"/><polygon points="54.0,18.9 70.9,28.65 70.9,48.15 54.0,57.9 37.1,48.15 37.1,28.65" fill="#fff"/><polygon points="35.8,50.1 52.7,59.85 52.7,79.35 35.8,89.1 18.9,79.35 18.9,59.85" fill="#fff" fill-opacity=".8"/><polygon points="72.2,50.1 89.1,59.85 89.1,79.35 72.2,89.1 55.3,79.35 55.3,59.85" fill="#fff" fill-opacity=".6"/><polygon points="51.4,27.35 56.6,27.35 56.6,39.05 62.58,39.05 54.0,49.45 45.42,39.05 51.4,39.05" fill="#0b6e63"/></svg><span>Swarm</span></a>
 <p>&copy; 2026 Jonathan Jackson. Swarm is an independent app.</p>
-<p>This site uses no cookies and no tracking. It is set in Literata and Atkinson Hyperlegible.</p>
+<p>This site uses no cookies and no tracking. The only script on it unlocks the download once the lawful-use box is ticked.</p>
+<p>Set in Bricolage Grotesque and Atkinson Hyperlegible.</p>
 </div>
-<nav aria-label="Footer"><ul>
+<nav aria-label="The app"><h2>The app</h2><ul>
 <li><a href="./">Home</a></li>
-<li><a href="compare.html">Compare</a></li>
-<li><a href="releases.html">Release notes</a></li>
-<li><a href="more-apps.html">More apps</a></li>
-<li><a href="privacy.html">Privacy policy</a></li>
-<li><a href="terms.html">Terms of use</a></li>
-<li><a href="licences.html">Licences</a></li>
-<li><a href="https://github.com/CustomGPTer/swarm/tree/source">Source code</a></li>
+<li><a href="./compare.html">Compare</a></li>
+<li><a href="./releases.html">Release notes</a></li>
+
+</ul></nav>
+<nav aria-label="Legal"><h2>Legal</h2><ul>
+<li><a href="./privacy.html">Privacy policy</a></li>
+<li><a href="./terms.html">Terms of use</a></li>
+<li><a href="./licences.html">Licences</a></li>
+</ul></nav>
+<nav aria-label="More"><h2>More</h2><ul>
+<li><a href="./more-apps.html">More apps</a></li>
+<li><a href="https://customgpter.github.io/">All apps</a></li>
 <li><a href="https://github.com/CustomGPTer/swarm/issues">Contact</a></li>
 </ul></nav>
 </div>
