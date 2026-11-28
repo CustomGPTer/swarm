@@ -9,7 +9,7 @@ The torrent engine is [libtorrent](https://www.libtorrent.org) (BSD 3-Clause) th
 [jellyfin-androidx-media](https://github.com/jellyfin/jellyfin-androidx-media) (GPL-3.0), which is why
 Swarm as a whole is released under the GNU General Public License, version 3. See `LICENSE`.
 
-Website, download and release notes: https://customgpter.github.io/swarm/
+Website, download and release notes: https://torusapps.com/swarm/
 
 ## What it does
 
