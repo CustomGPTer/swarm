@@ -89,7 +89,7 @@ fun TorrentsScreen(nav: NavHostController, openMenu: () -> Unit) {
         SubTabs(listOf("All", "Downloading", "Complete"), sub) { sub = it }
         if (blocked != null) Banner(blocked!!, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
         else if (vpnWarn && downloading.isNotEmpty()) Banner("No VPN is on. Other peers can see your IP address.", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
-        if (update != null) Banner("Swarm ${update!!.first} is ready to download.", action = "Get it") { try { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(update!!.second))) } catch (e: Exception) { } }
+        if (update != null) Banner("Update available: Swarm ${update!!.first}", action = "Open") { try { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(update!!.second))) } catch (e: Exception) { } }
         if (fallbackDir) Banner("Saving inside the app's own folder because file access is off.", action = "Allow") { askAllFiles(ctx) }
 
         Row(Modifier.fillMaxWidth().padding(start = 22.dp, end = 12.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {

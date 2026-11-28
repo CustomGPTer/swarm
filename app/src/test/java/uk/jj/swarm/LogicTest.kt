@@ -236,9 +236,7 @@ class LogicTest {
     @Test fun updates() {
         assertTrue(Updater.newer("v1.1", "1.0")); assertTrue(Updater.newer("2.0", "1.9.9")); assertTrue(Updater.newer("1.0.1", "1.0"))
         assertFalse(Updater.newer("1.0", "1.0")); assertFalse(Updater.newer("v1.0", "1.1")); assertFalse(Updater.newer("", "1.0"))
-        val json = """{"tag_name":"v1.2","html_url":"https://github.com/x/y/releases/tag/v1.2","assets":[{"browser_download_url":"https://github.com/x/y/releases/download/v1.2/notes.txt"},{"browser_download_url":"https://github.com/x/y/releases/download/v1.2/Swarm-1.2.apk"}]}"""
-        assertEquals("1.2" to "https://github.com/x/y/releases/download/v1.2/Swarm-1.2.apk", Updater.parse(json, "1.0"))
-        assertNull(Updater.parse(json, "1.2")); assertNull(Updater.parse("not json", "1.0"))
+        assertEquals("https://torusapps.com/swarm/", TorusLinks.PAGE); assertEquals("swarm", TorusLinks.SLUG)
     }
 
     // ---------------------------------------------------------------- safety

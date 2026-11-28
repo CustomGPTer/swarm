@@ -196,26 +196,13 @@ object Updater {
         return false
     }
 
-    /** Returns version to address, or null. [json] is the reply from GitHub's "latest release" address. */
-    fun parse(json: String, current: String): Pair<String, String>? = try {
-        val o = JSONObject(json)
-        val tag = o.optString("tag_name")
-        if (tag.isBlank() || !newer(tag, current)) null else {
-            val assets = o.optJSONArray("assets")
-            var url = o.optString("html_url")
-            if (assets != null) for (i in 0 until assets.length()) { val u = assets.getJSONObject(i).optString("browser_download_url"); if (u.endsWith(".apk", true)) { url = u; break } }
-            tag.trimStart('v', 'V') to url
-        }
-    } catch (e: Exception) { null }
-
+    /** Reads the signed TorusApps catalogue (at most every 12 hours unless [force]). Sets [available] to version and page. */
     suspend fun check(force: Boolean = false) = withContext(Dispatchers.IO) {
-        val repo = Prefs.getS("updateRepo", BuildConfig.UPDATE_REPO).trim()
-        if (repo.isBlank()) return@withContext
         val last = Prefs.getS("updateChecked", "0").toLongOrNull() ?: 0
         if (!force && System.currentTimeMillis() - last < 12 * 3600_000L) return@withContext
         Prefs.setS("updateChecked", System.currentTimeMillis().toString())
-        val body = Http.text("https://api.github.com/repos/$repo/releases/latest") ?: return@withContext
-        available.value = parse(body, BuildConfig.VERSION_NAME)
+        val v = TorusLinks.latestVersionNow() ?: return@withContext
+        available.value = if (newer(v, BuildConfig.VERSION_NAME)) v to TorusLinks.PAGE else null
     }
 }
 

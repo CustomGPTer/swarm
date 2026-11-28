@@ -27,7 +27,7 @@ import uk.jj.swarm.ui.SearchState
 @Config(sdk = [34], application = Application::class, qualifiers = "w411dp-h891dp-xxhdpi")
 @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)   // real hit-testing for rounded corners
 class UiSmokeTest {
-    companion object { @BeforeClass @JvmStatic fun native() = NativeLib.load() }
+    companion object { @BeforeClass @JvmStatic fun native() { NativeLib.load(); MainActivity.openingOff = true } }
 
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
@@ -145,7 +145,7 @@ class UiSmokeTest {
             go("rss", "No feeds yet."); back()
             go("watch", "Nothing on your watchlist."); back()
             go("create", "Create and seed"); back()
-            go("about", "Open source licences"); see("Save a backup file"); shot("17-about"); back()
+            go("about", "Open source licences"); see("Save a backup file"); see("Developed by Jonathan Jackson"); see("torusapps.com/swarm"); see("More apps"); see("hello@torusapps.com"); shot("17-about"); back()
             go("browser", "Browser"); back()
             go("help", "The basics, in two minutes"); see("Torznab and Jackett"); see("The DHT tab")
             rule.onNodeWithText("How to add a website as a source").performClick(); see("Results page address"); see("https://example.org/search?q=test"); shot("18-help"); back()

@@ -50,13 +50,25 @@ import uk.jj.swarm.play.Music
 import uk.jj.swarm.ui.*
 
 class MainActivity : ComponentActivity() {
+    companion object { @JvmStatic var openingOff = false }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Prefs.init(this)
         Engine.start(this)
+        val firstStart = savedInstanceState == null && !openingOff && intent?.action == Intent.ACTION_MAIN
         handle(intent)
-        setContent { SwarmTheme { Root() } }
+        setContent {
+            SwarmTheme {
+                var opening by remember { mutableStateOf(firstStart) }
+                Box(Modifier.fillMaxSize()) {
+                    Root()
+                    if (opening) OpeningScreen("Swarm", "Torrent search and downloads", MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
+                        Teal, androidx.compose.ui.graphics.Color(0xFF0B6E63), onFinished = { opening = false })
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); handle(intent) }

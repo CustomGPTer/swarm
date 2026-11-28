@@ -18,11 +18,9 @@ android {
         applicationId = "uk.jj.swarm"
         minSdk = 29
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.3.1"
         ndk { abiFilters += listOf("arm64-v8a") }
-        // GitHub repository (owner/name) whose latest release the app checks for a newer version.
-        buildConfigField("String", "UPDATE_REPO", "\"CustomGPTer/swarm\"")
     }
     signingConfigs {
         create("release") {

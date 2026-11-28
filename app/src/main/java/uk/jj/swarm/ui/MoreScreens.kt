@@ -299,19 +299,29 @@ fun AboutScreen(nav: NavHostController) {
         if (u != null) scope.launch(Dispatchers.IO) { val t = try { ctx.contentResolver.openInputStream(u)?.use { it.readBytes().decodeToString() } } catch (e: Exception) { null }; Ui.say(if (t == null) "Could not read that file" else Actions.importJson(ctx, t)) }
     }
     val engine = remember { try { LibTorrent.version() } catch (e: Throwable) { "?" } }
+    val update by uk.jj.swarm.Updater.available.collectAsState()
+    var checking by remember { mutableStateOf(false) }
 
     BackPage("About and backup", { nav.popBackStack() }) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             Row(Modifier.padding(22.dp), verticalAlignment = Alignment.CenterVertically) {
                 Honeycomb(Modifier.size(84.dp, 64.dp)); Spacer(Modifier.width(12.dp))
-                Column { Text("Swarm", fontSize = 24.sp, fontWeight = FontWeight.Bold); Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · libtorrent $engine", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                Column { Text("Swarm", fontSize = 24.sp, fontWeight = FontWeight.Bold); Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · libtorrent $engine", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(uk.jj.swarm.TorusLinks.DEVELOPER, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
             SectionTitle(Icons.Filled.Backup, "Backup")
             ValueRow("Save a backup file", "", "Your torrent list, sources, feeds, watchlist and settings in one file") { export.launch("swarm-backup.json") }
             ValueRow("Restore from a backup file", "", "Adds everything in the file to this phone") { restore.launch(arrayOf("application/json", "*/*")) }
             SectionTitle(Icons.Filled.SystemUpdate, "Updates")
-            ValueRow("Check for a new version", "", "Looks at the Swarm download page on GitHub") { scope.launch { uk.jj.swarm.Updater.check(true); Ui.say(uk.jj.swarm.Updater.available.value?.let { "Version ${it.first} is available. See the Torrents tab." } ?: "You have the latest version, or the download page could not be reached.") } }
-            TextRow("Download page", "updateRepo", BuildConfig.UPDATE_REPO, "The GitHub repository Swarm checks for new versions, written as owner/name. Leave empty to switch update checks off.")
+            ValueRow("Check for updates", when { checking -> "Checking…"; update != null -> "Update available"; else -> "" }, if (update != null) "Swarm ${update!!.first}. Tap to open its page on torusapps.com" else "Looks at the Swarm page on torusapps.com") {
+                if (update != null) openLink(ctx, uk.jj.swarm.TorusLinks.PAGE)
+                else if (!checking) scope.launch { checking = true; uk.jj.swarm.Updater.check(true); checking = false; if (uk.jj.swarm.Updater.available.value == null) Ui.say("You have the latest version, or torusapps.com could not be reached.") }
+            }
+            SectionTitle(Icons.Filled.Public, "TorusApps.com")
+            ValueRow("Website", "", "torusapps.com/swarm") { openLink(ctx, uk.jj.swarm.TorusLinks.PAGE) }
+            ValueRow("More apps", "", "Other apps by the same developer") { openLink(ctx, uk.jj.swarm.TorusLinks.HOME) }
+            ValueRow("Privacy policy", "", "torusapps.com/privacy") { openLink(ctx, uk.jj.swarm.TorusLinks.PRIVACY) }
+            ValueRow("Email", "", uk.jj.swarm.TorusLinks.EMAIL) { openLink(ctx, "mailto:" + uk.jj.swarm.TorusLinks.EMAIL) }
+            ValueRow("Source code", "", "github.com/CustomGPTer/swarm") { openLink(ctx, "https://github.com/CustomGPTer/swarm") }
             SectionTitle(Icons.Filled.BugReport, "Problems")
             ValueRow("Last crash report", if (crash.isBlank()) "None" else "View", "If Swarm ever closes by itself, the reason is kept here") { if (crash.isNotBlank()) showCrash = true }
             SectionTitle(Icons.Filled.Gavel, "Open source licences")
@@ -369,4 +379,9 @@ fun BrowserScreen(nav: NavHostController) {
             }
         }, onRelease = { it.destroy() })
     }
+}
+
+private fun openLink(ctx: android.content.Context, url: String) {
+    val i = if (url.startsWith("mailto:")) android.content.Intent(android.content.Intent.ACTION_SENDTO, Uri.parse(url)) else android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse(url))
+    try { ctx.startActivity(i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (e: Exception) { Ui.say("No app on this phone can open that") }
 }
